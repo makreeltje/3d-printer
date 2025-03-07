@@ -3,6 +3,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<ThreeDPrintCostCalculator.Services.IFileParsingService, ThreeDPrintCostCalculator.Services.FileParsingService>();
 
 var app = builder.Build();
 
