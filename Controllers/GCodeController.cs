@@ -51,61 +51,6 @@ namespace _3d_printer_cost_calculator.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error processing the GCODE file");
             }
         }
-
-        [HttpGet("{id}")]
-        public IActionResult GetGCodeFile(Guid id)
-        {
-            try
-            {
-                // In a real application, you would retrieve the GCodeFile from a database
-                // For this example, we'll just return a 404 not found
-                return NotFound($"GCODE file with ID {id} not found");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error retrieving GCODE file with ID {id}");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving the GCODE file");
-            }
-        }
-
-        [HttpPost("calculate-cost")]
-        public IActionResult CalculateCost([FromBody] CostCalculationRequest request)
-        {
-            try
-            {
-                if (request == null || request.GCodeFile == null)
-                {
-                    return BadRequest("Invalid request. GCODE file information is required.");
-                }
-
-                var costCalculation = _gCodeParserService.CalculateCost(
-                    request.GCodeFile,
-                    request.FilamentPricePerKg,
-                    request.ElectricityPricePerKwh,
-                    request.PrinterCost,
-                    request.HourlyLaborRate,
-                    request.PrinterPowerConsumption
-                );
-
-                return Ok(costCalculation);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error calculating cost for GCODE file");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error calculating cost");
-            }
-        }
-    }
-
-    public class CostCalculationRequest
-    {
-        public GCodeFile GCodeFile { get; set; }
-        public decimal FilamentPricePerKg { get; set; } = 20.0m; // Default value: $20 per kg
-        public decimal ElectricityPricePerKwh { get; set; } = 0.12m; // Default value: $0.12 per kWh
-        public decimal PrinterCost { get; set; } = 300.0m; // Default value: $300 printer cost
-        public decimal HourlyLaborRate { get; set; } = 15.0m; // Default value: $15 per hour
-        public decimal PrinterPowerConsumption { get; set; } = 150.0m; // Default value: 150W
-        public string Currency { get; set; } = "USD";
     }
 }
 

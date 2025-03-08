@@ -1,0 +1,98 @@
+# .NET Core build and output directories
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]uild/
+msbuild.log
+msbuild.err
+msbuild.wrn
+
+# Visual Studio files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.dbmdl
+*.jfm
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Rider files
+.idea/
+*.sln.iml
+*.ipr
+*.iws
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+!**/[Pp]ackages/repositories.config
+*.nuget.props
+*.nuget.targets
+
+# Angular/Node.js files
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.angular/
+.angular-cli.json
+.angular.json
+ClientApp/dist/
+ClientApp/out-tsc/
+ClientApp/bazel-out/
+ClientApp/coverage/
+ClientApp/.sass-cache/
+ClientApp/connect.lock/
+ClientApp/libpeerconnection.log
+ClientApp/testem.log
+ClientApp/typings/
+
+# Environment-specific files
+.env
+*.Development.json
+local.settings.json
+/Properties/PublishProfiles/
+/Properties/ServiceDependencies/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Temporary files
+*.swp
+*.swo
+*.tmp
+*.temp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# 3D Printing specific
+*.gcode.gz
+*.gco.gz
+*.g.gz
+*.gc.gz
+

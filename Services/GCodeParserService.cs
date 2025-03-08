@@ -1,19 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using _3d_printer_cost_calculator.Models;
-using Microsoft.Extensions.Logging;
 
 namespace _3d_printer_cost_calculator.Services
 {
     public interface IGCodeParserService
     {
         Task<GCodeFile> ParseGCodeFileAsync(Stream fileStream, string fileName);
-        GCodeFile ParseGCodeFile(string[] lines, string fileName);
-        CostCalculation CalculateCost(GCodeFile gCodeFile, decimal filamentPricePerKg, decimal electricityPricePerKwh, decimal printerCost, decimal hourlyLaborRate, decimal printerPowerConsumption);
     }
 
     public class GCodeParserService : IGCodeParserService
@@ -54,9 +48,9 @@ namespace _3d_printer_cost_calculator.Services
 
             // Initialize variables to track during parsing
             double filamentLength = 0;
-            double filamentDiameter = 1.75; // Default value
-            double filamentDensity = 1.24; // Default PLA density (g/cm³)
-            double layerHeight = 0.2; // Default value
+            double filamentDiameter = 0; // Default value
+            double filamentDensity = 0; // Default PLA density (g/cm³)
+            double layerHeight = 0; // Default value
             int layerCount = 0;
             double nozzleTemp = 0;
             double bedTemp = 0;
@@ -64,28 +58,80 @@ namespace _3d_printer_cost_calculator.Services
             bool hasSupport = false;
             double infillPercentage = 0;
             string slicerSoftware = "Unknown";
+            string filamentType = "Unknown";
+            string thumbnailBase64 = null;
 
             // Pattern matching for common slicer comments
-            var estimatedTimePattern = new Regex(@"estimated printing time.*?(\d+h)?.*?(\d+m)?.*?(\d+s)?", RegexOptions.IgnoreCase);
-            var filamentUsedPattern = new Regex(@"filament\s+used.*?(\d+\.?\d*).*?(mm|cm|m)", RegexOptions.IgnoreCase);
-            var filamentWeightPattern = new Regex(@"filament\s+used.*?(\d+\.?\d*).*?(g)", RegexOptions.IgnoreCase);
-            var layerHeightPattern = new Regex(@"layer.*?height.*?(\d+\.?\d*)", RegexOptions.IgnoreCase);
+            var estimatedTimePattern = new Regex(@"estimated printing time.*?=\s*(([\d]+)h)?\s*(([\d]+)m)?\s*(([\d]+)s)?", RegexOptions.IgnoreCase);
+            var filamentUsedPattern = new Regex(@"filament.*?used.*?\[mm\].*?=\s*([\d\.\,\s]+)", RegexOptions.IgnoreCase);
+            var filamentWeightPattern = new Regex(@"filament.*?used.*?\[g\].*?=\s*([\d\.\,\s]+)", RegexOptions.IgnoreCase);
+            var layerHeightPattern = new Regex(@"; layer.*?height.*?(\d+\.?\d*)", RegexOptions.IgnoreCase);
             var filamentDiameterPattern = new Regex(@"filament.*?diameter.*?(\d+\.?\d*)", RegexOptions.IgnoreCase);
-            var slicerPattern = new Regex(@"generated.*?(Cura|PrusaSlicer|Simplify3D|slic3r|IdeaMaker)", RegexOptions.IgnoreCase);
-            var nozzleTempPattern = new Regex(@"M109 S(\d+\.?\d*)|M104 S(\d+\.?\d*)", RegexOptions.IgnoreCase);
-            var bedTempPattern = new Regex(@"M190 S(\d+\.?\d*)|M140 S(\d+\.?\d*)", RegexOptions.IgnoreCase);
-            var infillPattern = new Regex(@"infill.*?(\d+\.?\d*)%", RegexOptions.IgnoreCase);
-            var supportPattern = new Regex(@"support.*?(yes|enabled|true)", RegexOptions.IgnoreCase);
+            var slicerPattern = new Regex(@"generated.*?(Cura|PrusaSlicer|Simplify3D|slic3r|IdeaMaker|OrcaSlicer)", RegexOptions.IgnoreCase);
+            // Updated pattern to better match temperature commands in GCODE
+            var nozzleTempPattern = new Regex(@"EXTRUDER_TEMP=(\d+\.?\d*)", RegexOptions.IgnoreCase);
+            var bedTempPattern = new Regex(@"BED_TEMP=(\d+\.?\d*)", RegexOptions.IgnoreCase);
+            var infillPattern = new Regex(@"infill.*?density.*?(\d+\.?\d*)%", RegexOptions.IgnoreCase);
+            var supportPattern = new Regex(@"enable.*?support.*?(\d+\.?\d*)", RegexOptions.IgnoreCase);
+            var totalLayersPattern = new Regex(@"total.*?layers.*?count.*?(\d+)", RegexOptions.IgnoreCase);
+            var filamentTypePattern = new Regex(@"; filament.*?type.*?([A-Z]+)", RegexOptions.IgnoreCase);
+            // Matches thumbnail start/end delimiters in GCODE
+            var thumbnailStartPattern = new Regex(@"; thumbnail begin (\d+)x(\d+) (\d+)", RegexOptions.IgnoreCase);
+            var thumbnailEndPattern = new Regex(@"; thumbnail end", RegexOptions.IgnoreCase);
 
-            // Track layer changes
-            var layerChangePattern = new Regex(@";LAYER:(\d+)", RegexOptions.IgnoreCase);
-
-            // Track extrusion moves to calculate filament used
-            var extrusionPattern = new Regex(@"G1.*?E(\d+\.?\d*)", RegexOptions.IgnoreCase);
             double lastE = 0;
+
+            // Extract thumbnail data
+            bool inThumbnail = false;
+            int thumbnailWidth = 0;
+            int thumbnailHeight = 0;
+            int thumbnailDataLines = 0;
+            StringBuilder thumbnailData = new StringBuilder();
 
             foreach (var line in lines)
             {
+                // Check for thumbnail start
+                if (!inThumbnail)
+                {
+                    var thumbnailStartMatch = thumbnailStartPattern.Match(line);
+                    if (thumbnailStartMatch.Success)
+                    {
+                        inThumbnail = true;
+                        thumbnailData.Clear();
+                        if (int.TryParse(thumbnailStartMatch.Groups[1].Value, out thumbnailWidth) &&
+                            int.TryParse(thumbnailStartMatch.Groups[2].Value, out thumbnailHeight) &&
+                            int.TryParse(thumbnailStartMatch.Groups[3].Value, out thumbnailDataLines))
+                        {
+                            // Found start of thumbnail, prepare to collect data
+                            continue;
+                        }
+                    }
+                }
+                else
+                {
+                    // Check for thumbnail end
+                    if (thumbnailEndPattern.Match(line).Success)
+                    {
+                        inThumbnail = false;
+                        
+                        // Convert collected base64 data
+                        if (thumbnailData.Length > 0)
+                        {
+                            thumbnailBase64 = thumbnailData.ToString();
+                        }
+                        continue;
+                    }
+                    
+                    // Inside thumbnail section - collect the data
+                    if (line.StartsWith(";"))
+                    {
+                        // Remove the leading semicolon and any whitespace
+                        string cleanedLine = line.TrimStart(';', ' ', '\t');
+                        thumbnailData.Append(cleanedLine);
+                        continue;
+                    }
+                }
+                
                 // Check for slicer software
                 var slicerMatch = slicerPattern.Match(line);
                 if (slicerMatch.Success && slicerMatch.Groups[1].Success)
@@ -93,18 +139,26 @@ namespace _3d_printer_cost_calculator.Services
                     slicerSoftware = slicerMatch.Groups[1].Value;
                 }
 
-                // Extract layer height
-                var layerHeightMatch = layerHeightPattern.Match(line);
-                if (layerHeightMatch.Success && layerHeightMatch.Groups[1].Success)
+                // Check for filament type
+                var filamentTypeMatch = filamentTypePattern.Match(line);
+                if (filamentTypeMatch.Success)
                 {
-                    layerHeight = double.Parse(layerHeightMatch.Groups[1].Value);
+                    filamentType = filamentTypeMatch.Groups[1].Value;
                 }
 
-                // Extract filament diameter
+                // Extract layer height
+                var layerHeightMatch = layerHeightPattern.Match(line);
+                if (layerHeightMatch.Success)
+                {
+                    if (double.TryParse(layerHeightMatch.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double parsedHeight))
+                    {
+                        layerHeight = parsedHeight;
+                    }
+                }
                 var filamentDiameterMatch = filamentDiameterPattern.Match(line);
                 if (filamentDiameterMatch.Success && filamentDiameterMatch.Groups[1].Success)
                 {
-                    filamentDiameter = double.Parse(filamentDiameterMatch.Groups[1].Value);
+                    double.TryParse(filamentDiameterMatch.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out filamentDiameter);
                 }
 
                 // Parse estimated printing time from comments
@@ -113,62 +167,93 @@ namespace _3d_printer_cost_calculator.Services
                 {
                     int hours = 0, minutes = 0, seconds = 0;
 
-                    if (timeMatch.Groups[1].Success)
-                    {
-                        hours = int.Parse(Regex.Match(timeMatch.Groups[1].Value, @"\d+").Value);
-                    }
-
+                    // Group 2, 4, 6 contain the actual numbers from the new regex pattern
                     if (timeMatch.Groups[2].Success)
                     {
-                        minutes = int.Parse(Regex.Match(timeMatch.Groups[2].Value, @"\d+").Value);
+                        int.TryParse(timeMatch.Groups[2].Value, out hours);
                     }
 
-                    if (timeMatch.Groups[3].Success)
+                    if (timeMatch.Groups[4].Success)
                     {
-                        seconds = int.Parse(Regex.Match(timeMatch.Groups[3].Value, @"\d+").Value);
+                        int.TryParse(timeMatch.Groups[4].Value, out minutes);
                     }
 
+                    if (timeMatch.Groups[6].Success)
+                    {
+                        int.TryParse(timeMatch.Groups[6].Value, out seconds);
+                    }
                     estimatedTime = new TimeSpan(hours, minutes, seconds);
                 }
 
                 // Check for direct filament length information
                 var filamentLengthMatch = filamentUsedPattern.Match(line);
-                if (filamentLengthMatch.Success && filamentLengthMatch.Groups[1].Success)
+                if (filamentLengthMatch.Success)
                 {
-                    double value = double.Parse(filamentLengthMatch.Groups[1].Value);
-                    string unit = filamentLengthMatch.Groups[2].Value.ToLower();
-
-                    // Convert to mm
-                    if (unit == "m")
-                        filamentLength = value * 1000;
-                    else if (unit == "cm")
-                        filamentLength = value * 10;
-                    else // mm
-                        filamentLength = value;
+                    // Split by comma to handle multiple values
+                    string[] values = filamentLengthMatch.Groups[1].Value.Split(',');
+                    
+                    // Find highest non-zero value
+                    double highestValue = 0;
+                    foreach (string val in values)
+                    {
+                        if (double.TryParse(val.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double parsedValue))
+                        {
+                            if (parsedValue > highestValue)
+                            {
+                                highestValue = parsedValue;
+                            }
+                        }
+                    }
+                    
+                    if (highestValue > 0)
+                    {
+                        filamentLength = highestValue;
+                    }
                 }
-
                 // Check for nozzle temperature
                 var nozzleTempMatch = nozzleTempPattern.Match(line);
                 if (nozzleTempMatch.Success)
                 {
-                    var tempValue = nozzleTempMatch.Groups[1].Success 
-                        ? nozzleTempMatch.Groups[1].Value 
-                        : nozzleTempMatch.Groups[2].Value;
-                    nozzleTemp = double.Parse(tempValue);
+                    string tempValue = null;
+                    // Check each capture group in order
+                    for (int i = 1; i <= 4; i++)
+                    {
+                        if (nozzleTempMatch.Groups[i].Success)
+                        {
+                            tempValue = nozzleTempMatch.Groups[i].Value;
+                            break;
+                        }
+                    }
+                    
+                    if (tempValue != null && double.TryParse(tempValue, NumberStyles.Any, CultureInfo.InvariantCulture, out double parsedTemp))
+                    {
+                        nozzleTemp = parsedTemp;
+                    }
                 }
-
                 // Check for bed temperature
                 var bedTempMatch = bedTempPattern.Match(line);
                 if (bedTempMatch.Success)
                 {
-                    bedTemp = double.Parse(bedTempMatch.Groups[1].Value);
+                    string tempValue = null;
+                    // Check each capture group in order
+                    for (int i = 1; i <= 4; i++)
+                    {
+                        if (bedTempMatch.Groups[i].Success)
+                        {
+                            tempValue = bedTempMatch.Groups[i].Value;
+                            break;
+                        }
+                    }
+                    
+                    if (tempValue != null && double.TryParse(tempValue, NumberStyles.Any, CultureInfo.InvariantCulture, out double parsedTemp))
+                    {
+                        bedTemp = parsedTemp;
+                    }
                 }
-
-                // Check for infill percentage
                 var infillMatch = infillPattern.Match(line);
                 if (infillMatch.Success && infillMatch.Groups[1].Success)
                 {
-                    infillPercentage = double.Parse(infillMatch.Groups[1].Value);
+                    double.TryParse(infillMatch.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out infillPercentage);
                 }
 
                 // Check if supports are used
@@ -178,109 +263,64 @@ namespace _3d_printer_cost_calculator.Services
                     hasSupport = true;
                 }
 
-                // Track layer changes
-                var layerMatch = layerChangePattern.Match(line);
-                if (layerMatch.Success && layerMatch.Groups[1].Success)
+                // Check for total layers count information
+                var totalLayersMatch = totalLayersPattern.Match(line);
+                if (totalLayersMatch.Success)
                 {
-                    int layer = int.Parse(layerMatch.Groups[1].Value);
-                    layerCount = Math.Max(layerCount, layer + 1); // +1 because layers are 0-indexed
-                }
-
-                // Track extrusion moves to calculate filament used if not provided directly
-                if (filamentLength == 0)
-                {
-                    var extrusionMatch = extrusionPattern.Match(line);
-                    if (extrusionMatch.Success && extrusionMatch.Groups[1].Success)
+                    int totalLayers = 0;
+                    if (totalLayersMatch.Groups[1].Success && int.TryParse(totalLayersMatch.Groups[1].Value, out totalLayers))
                     {
-                        double e = double.Parse(extrusionMatch.Groups[1].Value);
-                        if (e > lastE) // Only count positive extrusion (not retractions)
-                        {
-                            filamentLength += (e - lastE);
-                        }
-                        lastE = e;
+                        layerCount = totalLayers;
                     }
                 }
             }
 
             // Calculate filament weight if not directly found in comments
             double filamentWeightGrams = 0;
+            
+            // First try to parse filament weight directly from comments
             var filamentWeightMatch = filamentWeightPattern.Match(string.Join("\n", lines));
-            if (filamentWeightMatch.Success && filamentWeightMatch.Groups[1].Success)
+            if (filamentWeightMatch.Success)
             {
-                filamentWeightGrams = double.Parse(filamentWeightMatch.Groups[1].Value);
-            }
-            else if (filamentLength > 0)
-            {
-                // Calculate weight from length: volume = π * (diameter/2)² * length
-                double radius = filamentDiameter / 2; // in mm
-                double volume = Math.PI * radius * radius * filamentLength; // in mm³
-                filamentWeightGrams = (volume / 1000) * filamentDensity; // convert to cm³ and multiply by density
+                // Split by comma to handle multiple values
+                string[] values = filamentWeightMatch.Groups[1].Value.Split(',');
+                
+                // Find highest non-zero value
+                double highestValue = 0;
+                foreach (string val in values)
+                {
+                    if (double.TryParse(val.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double parsedValue))
+                    {
+                        if (parsedValue > highestValue)
+                        {
+                            highestValue = parsedValue;
+                        }
+                    }
+                }
+                
+                if (highestValue > 0)
+                {
+                    filamentWeightGrams = highestValue;
+                }
             }
 
-            // Set the parsed values to the GCodeFile object
-            gCodeFile.FilamentUsageLength = filamentLength;
-            gCodeFile.FilamentUsageWeight = filamentWeightGrams;
+                // Set the parsed values to the GCodeFile object
+            gCodeFile.FilamentUsageLength = filamentLength; // Store actual length in mm
+            gCodeFile.FilamentUsageWeight = filamentWeightGrams; // Store actual weight in grams
             gCodeFile.EstimatedPrintTime = estimatedTime;
             gCodeFile.LayerCount = layerCount;
-            gCodeFile.LayerHeight = layerHeight;
+            gCodeFile.LayerHeight = layerHeight; // Already correctly parsed
             gCodeFile.NozzleTemperature = nozzleTemp;
             gCodeFile.BedTemperature = bedTemp;
             gCodeFile.FilamentDiameter = filamentDiameter;
             gCodeFile.HasSupport = hasSupport;
             gCodeFile.InfillPercentage = infillPercentage;
             gCodeFile.SlicerSoftware = slicerSoftware;
+            gCodeFile.FilamentType = filamentType;
+            gCodeFile.ThumbnailBase64 = thumbnailBase64;
 
             _logger.LogInformation($"Successfully parsed GCODE file: {fileName}");
             return gCodeFile;
-        }
-
-        public CostCalculation CalculateCost(GCodeFile gCodeFile, decimal filamentPricePerKg, decimal electricityPricePerKwh, decimal printerCost, decimal hourlyLaborRate, decimal printerPowerConsumption)
-        {
-            try
-            {
-                _logger.LogInformation($"Calculating costs for GCODE file: {gCodeFile.Filename}");
-
-                // Convert print time to hours
-                decimal printTimeHours = (decimal)gCodeFile.EstimatedPrintTime.TotalHours;
-
-                // Calculate material cost
-                decimal filamentWeightKg = (decimal)gCodeFile.FilamentUsageWeight / 1000; // Convert grams to kg
-                decimal materialCost = filamentWeightKg * filamentPricePerKg;
-
-                // Calculate electricity cost
-                decimal electricityCost = printTimeHours * (printerPowerConsumption / 1000) * electricityPricePerKwh;
-
-                // Calculate machine depreciation cost (simplified)
-                decimal expectedLifespan = 2000; // Assume 2000 hours of printer life
-                decimal depreciationCost = (printerCost / expectedLifespan) * printTimeHours;
-
-                // Calculate labor cost (assume 15 min setup time)
-                decimal setupTimeHours = 0.25m;
-                decimal laborCost = setupTimeHours * hourlyLaborRate;
-
-                // Calculate total cost
-                decimal totalCost = materialCost + electricityCost + depreciationCost + laborCost;
-
-                // Create and return the cost calculation
-                var costCalculation = new CostCalculation
-                {
-                    MaterialCost = materialCost,
-                    ElectricityCost = electricityCost,
-                    DepreciationCost = depreciationCost,
-                    LaborCost = laborCost,
-                    TotalCost = totalCost,
-                    Currency = "USD", // Default currency
-                    GCodeFile = gCodeFile
-                };
-
-                _logger.LogInformation($"Cost calculation completed for: {gCodeFile.Filename}, total cost: {totalCost:F2}");
-                return costCalculation;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error calculating costs for GCODE file: {gCodeFile.Filename}");
-                throw;
-            }
         }
     }
 }

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { GcodeService, GCodeFile, CostCalculation, CostCalculationRequest } from '../services/gcode.service';
+import { GcodeService, GCodeFile } from '../services/gcode.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
@@ -13,8 +13,6 @@ export class GcodeParserComponent implements OnInit {
   uploadError = '';
   selectedFile: File | null = null;
   parsedGCodeFile: GCodeFile | null = null;
-  costCalculation: CostCalculation | null = null;
-  calculationError = '';
 
   // Form for cost calculation parameters
   costForm: FormGroup;
@@ -44,9 +42,7 @@ export class GcodeParserComponent implements OnInit {
     this.selectedFile = event.target.files[0] as File;
     // Reset any previous data
     this.parsedGCodeFile = null;
-    this.costCalculation = null;
     this.uploadError = '';
-    this.calculationError = '';
   }
 
   uploadFile(): void {
@@ -80,123 +76,31 @@ export class GcodeParserComponent implements OnInit {
     });
   }
 
-  calculateCost(): void {
-    if (!this.parsedGCodeFile || !this.parsedGCodeFile.id) {
-      this.calculationError = 'Please upload a GCODE file first';
-      return;
+  // Format filament length to display in meters when > 1000mm
+  // Input is in mm, convert to m for better readability when appropriate
+  formatFilamentLength(length: number): string {
+    if (length >= 1000) {
+      return `${(length / 1000).toFixed(2)} m`;
+    } else {
+      return `${length.toFixed(2)} mm`;
     }
-
-    if (!this.costForm.valid) {
-      this.calculationError = 'Please enter valid values for all fields';
-      return;
-    }
-
-    const request: CostCalculationRequest = {
-      gcodeFileId: this.parsedGCodeFile.id,
-      ...this.costForm.value
-    };
-
-    this.calculationError = '';
-
-    this.gcodeService.calculateCosts(request).subscribe({
-      next: (result) => {
-        this.costCalculation = result;
-      },
-      error: (error) => {
-        this.calculationError = `Error calculating costs: ${error.message || 'Unknown error'}`;
-        console.error('Error calculating costs:', error);
-      }
-    });
   }
 
-  // Helper method to format a number with 2 decimal places and the currency
-  formatCurrency(value: number, currency: string = 'USD'): string {
-    return new Intl.NumberFormat('en-US', { 
-      style: 'currency', 
-      currency: currency 
-    }).format(value);
+  // Format filament weight with correct precision
+  formatFilamentWeight(weight: number): string {
+    return `${weight.toFixed(2)} g`;
   }
 
-  // Calculate cost percentages for visualization
-  getMaterialCostPercentage(): number {
-    if (!this.costCalculation || this.costCalculation.totalCost === 0) {
-      return 0;
-    }
-    return (this.costCalculation.materialCost / this.costCalculation.totalCost) * 100;
+  // Format layer height with correct precision (mm)
+  formatLayerHeight(height: number): string {
+    return `${height.toFixed(2)} mm`;
   }
 
-  getElectricityCostPercentage(): number {
-    if (!this.costCalculation || this.costCalculation.totalCost === 0) {
-      return 0;
+  // Format temperature with graceful handling of null values
+  formatTemperature(temp: number | null): string {
+    if (temp === null) {
+      return 'N/A';
     }
-    return (this.costCalculation.electricityCost / this.costCalculation.totalCost) * 100;
-  }
-
-  getDepreciationCostPercentage(): number {
-    if (!this.costCalculation || this.costCalculation.totalCost === 0) {
-      return 0;
-    }
-    return (this.costCalculation.depreciationCost / this.costCalculation.totalCost) * 100;
-  }
-
-  getLaborCostPercentage(): number {
-    if (!this.costCalculation || this.costCalculation.totalCost === 0) {
-      return 0;
-    }
-    return (this.costCalculation.laborCost / this.costCalculation.totalCost) * 100;
-  }
-
-  // Export cost report as CSV
-  exportCostReport(): void {
-    if (!this.costCalculation || !this.parsedGCodeFile) {
-      this.calculationError = 'No cost calculation available to export';
-      return;
-    }
-
-    // Create CSV content
-    const csvRows = [
-      ['3D Printing Cost Report'],
-      ['Generated on', new Date().toLocaleString()],
-      [''],
-      ['File Information'],
-      ['Filename', this.parsedGCodeFile.filename],
-      ['Filament Usage (Length)', `${this.parsedGCodeFile.filamentUsageLength.toFixed(2)} mm`],
-      ['Filament Usage (Weight)', `${this.parsedGCodeFile.filamentUsageWeight.toFixed(2)} g`],
-      ['Estimated Print Time', this.parsedGCodeFile.estimatedPrintTimeFormatted],
-      ['Layer Count', `${this.parsedGCodeFile.layerCount}`],
-      ['Layer Height', `${this.parsedGCodeFile.layerHeight} mm`],
-      ['Nozzle Temperature', `${this.parsedGCodeFile.nozzleTemperature}°C`],
-      ['Bed Temperature', `${this.parsedGCodeFile.bedTemperature}°C`],
-      [''],
-      ['Cost Parameters'],
-      ['Material Cost per kg', `${this.formatCurrency(this.costForm.value.materialCostPerKg, this.costForm.value.currency)}`],
-      ['Electricity Cost per kWh', `${this.formatCurrency(this.costForm.value.electricityCostPerKwh, this.costForm.value.currency)}`],
-      ['Printer Cost', `${this.formatCurrency(this.costForm.value.printerCost, this.costForm.value.currency)}`],
-      ['Printer Lifespan', `${this.costForm.value.printerLifespan} hours`],
-      ['Printer Power Consumption', `${this.costForm.value.printerPowerConsumption} kW`],
-      ['Labor Cost per Hour', `${this.formatCurrency(this.costForm.value.laborCostPerHour, this.costForm.value.currency)}`],
-      ['Labor Time', `${this.costForm.value.laborTime} hours`],
-      [''],
-      ['Cost Breakdown'],
-      ['Material Cost', `${this.formatCurrency(this.costCalculation.materialCost, this.costCalculation.currency)} (${this.getMaterialCostPercentage().toFixed(1)}%)`],
-      ['Electricity Cost', `${this.formatCurrency(this.costCalculation.electricityCost, this.costCalculation.currency)} (${this.getElectricityCostPercentage().toFixed(1)}%)`],
-      ['Depreciation Cost', `${this.formatCurrency(this.costCalculation.depreciationCost, this.costCalculation.currency)} (${this.getDepreciationCostPercentage().toFixed(1)}%)`],
-      ['Labor Cost', `${this.formatCurrency(this.costCalculation.laborCost, this.costCalculation.currency)} (${this.getLaborCostPercentage().toFixed(1)}%)`],
-      [''],
-      ['Total Cost', this.formatCurrency(this.costCalculation.totalCost, this.costCalculation.currency)]
-    ];
-
-    // Convert to CSV format
-    const csvContent = csvRows.map(row => row.join(',')).join('\n');
-
-    // Create and download the file
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `cost-report-${this.parsedGCodeFile.filename}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    return `${temp}°C`;
   }
 }

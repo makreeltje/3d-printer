@@ -15,6 +15,11 @@ namespace _3d_printer_cost_calculator.Models
         public double FilamentUsageLength { get; set; }
 
         /// <summary>
+        /// Filament type (PLA, ABS, PETG, etc.)
+        /// </summary>
+        public string FilamentType { get; set; }
+
+        /// <summary>
         /// Weight of filament used in grams
         /// </summary>
         public double FilamentUsageWeight { get; set; }
@@ -50,11 +55,6 @@ namespace _3d_printer_cost_calculator.Models
         public double FilamentDiameter { get; set; }
 
         /// <summary>
-        /// Print speed in mm/s
-        /// </summary>
-        public double PrintSpeed { get; set; }
-
-        /// <summary>
         /// Infill percentage (0-100)
         /// </summary>
         public double InfillPercentage { get; set; }
@@ -73,6 +73,11 @@ namespace _3d_printer_cost_calculator.Models
         /// The slicer software used to generate the GCODE
         /// </summary>
         public string SlicerSoftware { get; set; }
+
+        /// <summary>
+        /// Base64 encoded thumbnail image from the GCODE file
+        /// </summary>
+        public string ThumbnailBase64 { get; set; }
     }
 }
 
