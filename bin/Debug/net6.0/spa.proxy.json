@@ -1,8 +1,0 @@
-{
-"SpaProxyServer": {
-"ServerUrl": "https://localhost:44497",
-"LaunchCommand": "npm start",
-"WorkingDirectory": "/Users/makreeltje/Git/Personal/3d-printer/ClientApp/",
-"MaxTimeoutInSeconds": "120"
-}
-}
