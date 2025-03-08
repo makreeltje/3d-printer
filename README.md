@@ -1,288 +1,257 @@
-# 3D Print Cost Calculator
+# 3D Printer Cost Calculator
 
 ## Project Overview
 
-The 3D Print Cost Calculator is an application designed to help users accurately calculate the costs associated with 3D printing projects. The application processes 3MF (3D Manufacturing Format) files to extract model data and apply customizable cost calculations based on material usage, print time, and other parameters.
+The 3D Printer Cost Calculator is an application designed to analyze GCODE files from 3D printing slicers and calculate the total cost of printing a specific model. By parsing GCODE files, the application extracts crucial information such as filament usage, print time, and other parameters to provide accurate cost estimates for 3D printing projects.
 
-**Key Features:**
-- Parse and analyze 3MF files to extract printable data
-- Calculate printing costs based on customizable parameters
-- Support for both local file system and cloud-hosted 3MF files
-- Intuitive user interface for file selection and cost review
-- Detailed breakdown of costs (material, time, electricity, etc.)
+This application helps 3D printing enthusiasts, small businesses, and service providers to:
+- Calculate exact costs for 3D printing projects
+- Make informed decisions about pricing for clients
+- Analyze efficiency and cost-effectiveness of different print settings
+- Manage and track printing expenses
 
-## Development Roadmap
+## Features to be Implemented
 
-### Phase 1: Core Foundation
+### Phase 1: Core Functionality
 
-1. **Project Setup**
-   - Initialize frontend and backend repositories
-   - Set up basic CI/CD pipeline
-   - Configure development environment
+- **GCODE File Parser**
+  - Extract filament usage (length and weight)
+  - Extract estimated print time
+  - Extract layer information (count, heights)
+  - Extract print settings (temperature, speed, etc.)
 
-2. **Core Backend Features**
-   - 3MF file parsing service
-   - Cost calculation algorithms
-   - Basic API endpoints
-   - Local file system integration
+- **Cost Calculation Engine**
+  - Material cost calculation (based on filament weight and price per kg)
+  - Electricity cost calculation (based on printer power consumption and print time)
+  - Machine depreciation calculation (based on printer cost and usage)
+  - Failure rate adjustment (risk factor for print failures)
 
-3. **Core Frontend Features**
-   - Basic UI layout
-   - File upload/selection component
-   - Results display component
+- **Basic User Interface**
+  - GCODE file upload/selection
+  - Material cost input (price per kg)
+  - Electricity cost input (price per kWh)
+  - Printer settings (power consumption, cost, etc.)
+  - Cost breakdown display
 
-### Phase 2: Enhanced Functionality
+### Phase 2: Advanced Features
 
-1. **Cloud Integration**
-   - Cloud storage connection
-   - User authentication
-   - Folder structure management
+- **Printer Profiles**
+  - Save multiple printer configurations
+  - Different power consumption rates
+  - Specific maintenance costs
 
-2. **Advanced Calculation Features**
-   - Material customization
-   - Printer-specific calculations
-   - Batch processing
+- **Material Profiles**
+  - Manage different filament types and their costs
+  - Account for different densities and properties
 
-3. **UI Enhancements**
-   - Responsive design improvements
-   - Visualization of 3D models
-   - User preferences
+- **Project Management**
+  - Save projects and their cost calculations
+  - Compare different print settings for cost optimization
+  - Batch processing of multiple GCODE files
 
-### Phase 3: Polishing & Optimization
+- **Enhanced Analytics**
+  - Visualize cost breakdowns
+  - Track printing costs over time
+  - Compare different slicing settings for cost efficiency
 
-1. **Performance Optimization**
-   - Calculation speed improvements
-   - Caching mechanisms
-   - Frontend optimization
+### Phase 3: Professional Features
 
-2. **Additional Features**
-   - Reporting and exports
-   - History tracking
-   - Comparison tools
+- **Business Tools**
+  - Generate quotes for clients
+  - Export cost reports (PDF, CSV)
+  - Profit margin calculation
 
-## Git Workflow
+- **Integration with Slicers**
+  - Direct connection to popular slicers
+  - Real-time cost calculation as settings change
 
-We use a modified GitHub Flow workflow with feature branches:
+- **Multi-material Support**
+  - Calculate costs for multi-material/multi-extruder prints
+  - Account for support material usage separately
 
-### Branch Structure
+## Development Workflow
 
-- **main**: Always stable and deployable
-- **feature branches**: For all new development work
-- **bugfix branches**: For bug fixes
-- **hotfix branches**: For critical production fixes
-- **release branches**: For release preparation
+### Git Branching Strategy
 
-### Branch Naming Convention
+We follow a modified Git Flow approach:
+
+- **main**: Production-ready code, always stable
+- **develop**: Integration branch for features, pre-release testing
+- **feature/xxx**: Feature branches for new development
+- **bugfix/xxx**: Bug fix branches
+- **release/x.x.x**: Release preparation branches
+- **hotfix/xxx**: Emergency fixes for production
+
+#### Branch Naming Convention
 
 ```
-<type>/<description>
+<type>/<short-description>
 
 Types:
 - feature: New functionality
-- bugfix: Bug fixes
-- hotfix: Critical fixes for production
-- design: UI/UX changes
-- refactor: Code improvements without changing functionality
+- bugfix: Bug fixes 
+- hotfix: Critical production fixes
+- release: Release preparation
 - docs: Documentation updates
+- refactor: Code improvements without changing functionality
 ```
 
-Example: `feature/file-upload-component`
+Examples:
+- `feature/gcode-parser`
+- `feature/material-cost-calculator`
+- `bugfix/filament-weight-calculation`
+- `docs/api-documentation`
 
-### Pull Request Process
+### Feature Development Workflow
 
-1. Create a feature branch from `main`
-2. Develop and test your changes
-3. Create a Pull Request to `main`
-4. Ensure CI tests pass
-5. Get code review approval
-6. Merge to `main`
+1. **Create Feature Branch**
+   ```bash
+   git checkout develop
+   git pull origin develop
+   git checkout -b feature/gcode-parser
+   ```
 
-## Release Flow
+2. **Develop and Test**
+   - Implement the feature with appropriate tests
+   - Commit regularly with meaningful commit messages
 
-### Standard Release Process
+3. **Keep Branch Updated**
+   ```bash
+   git checkout develop
+   git pull origin develop
+   git checkout feature/gcode-parser
+   git merge develop
+   # Resolve any conflicts
+   ```
 
-```bash
-# 1. Ensure you are on the main branch with latest changes
-git checkout main
-git pull origin main
+4. **Create Pull Request**
+   - Push branch: `git push origin feature/gcode-parser`
+   - Create PR against `develop` branch
+   - Include description of changes, testing performed
+   - Link to relevant issue/ticket
 
-# 2. Create a release branch
-git checkout -b release/v1.0.0
+5. **Code Review**
+   - Address review comments
+   - Update PR as needed
 
-# 3. Make any release-specific changes (version numbers, etc.)
-# Edit version files as needed
+6. **Merge**
+   - PR is merged into `develop` after approval
+   - Delete feature branch after merge
 
-# 4. Commit version changes
-git add .
-git commit -m "Bump version to 1.0.0"
+### Release Process
 
-# 5. Push release branch
-git push origin release/v1.0.0
+1. **Create Release Branch**
+   ```bash
+   git checkout develop
+   git pull origin develop
+   git checkout -b release/1.0.0
+   ```
 
-# 6. Create a pull request from release/v1.0.0 to main
-# Complete code review and approval process
+2. **Finalize Release**
+   - Update version numbers
+   - Perform final testing
+   - Fix any release-specific issues
 
-# 7. After merging the release PR to main:
-git checkout main
-git pull origin main
+3. **Merge to Main and Develop**
+   - Create PR to merge `release/1.0.0` into `main`
+   - After merge, tag the release: `git tag -a v1.0.0 -m "Version 1.0.0"`
+   - Merge `release/1.0.0` back into `develop`
 
-# 8. Tag the release
-git tag -a v1.0.0 -m "Release version 1.0.0"
-git push origin v1.0.0
+## Technical Implementation
 
-# 9. Build and deploy production artifacts using CI/CD
-# (This step typically happens automatically via CI/CD pipeline)
+### GCODE Parsing
+
+GCODE files contain commands that control the 3D printer. Key information to extract includes:
+
+- **Filament Usage**: Found in comments like `;filament used [g] = 45.32`
+- **Print Time**: Often indicated with comments like `;estimated printing time = 5h 23m`
+- **Layer Info**: Extracted from layer change commands and comments
+- **Temperatures**: Extracted from temperature commands (M104, M109, etc.)
+- **Print Settings**: From various comments added by the slicer
+
+The GCODE parser will:
+1. Read the file line by line
+2. Extract metadata from header comments
+3. Calculate filament usage from extrusion commands (E values)
+4. Interpret timestamps and layer changes
+5. Calculate total print time and material usage
+
+### Cost Calculation Algorithm
+
+The core cost calculation will be based on:
+
+```
+Total Cost = Material Cost + Electricity Cost + Depreciation Cost + Labor Cost + Profit Margin
 ```
 
-### Hotfix Process
-
-```bash
-# 1. Create hotfix branch from production tag
-git checkout -b hotfix/critical-bug v1.0.0
-
-# 2. Make the necessary fixes
-# Edit files as needed
-
-# 3. Commit changes
-git add .
-git commit -m "Fix critical bug in calculation algorithm"
-
-# 4. Push hotfix branch
-git push origin hotfix/critical-bug
-
-# 5. Create pull request to main
-# Complete code review and approval process
-
-# 6. After merging, tag the new patch version
-git checkout main
-git pull origin main
-git tag -a v1.0.1 -m "Hotfix release v1.0.1"
-git push origin v1.0.1
-```
-
-## Development Workflow Guidance
-
-### Frontend vs Backend Development
-
-#### Backend Development Focus:
-
-- Implementing core calculation logic
-- Setting up file parsing services
-- Creating new API endpoints
-- Database schema updates
-- Integration with external services
-
-**Workflow:**
-1. Define API contracts first
-2. Implement backend services with tests
-3. Create API endpoints
-4. Document API for frontend team
-
-#### Frontend Development Focus:
-
-- User interface components
-- File upload/selection interfaces
-- Results visualization
-- User experience improvements
-- Responsive design implementation
-
-**Workflow:**
-1. Create wireframes/mockups
-2. Implement UI components
-3. Connect to backend APIs
-4. Add validation and error handling
-
-### Vertical Slice Approach
-
-For optimal productivity, we implement features as "vertical slices" - complete features from backend to frontend:
-
-1. Define feature requirements
-2. Create backend API endpoints
-3. Implement frontend components for the feature
-4. Test the complete feature end-to-end
-5. Refine and polish
+Where:
+- **Material Cost** = Filament Weight (kg) × Filament Price ($/kg)
+- **Electricity Cost** = Power Consumption (kW) × Print Time (h) × Electricity Price ($/kWh)
+- **Depreciation Cost** = (Printer Cost × Print Time) ÷ Expected Lifetime
+- **Labor Cost** = Setup Time (h) × Labor Rate ($/h)
+- **Profit Margin** = (Sum of above costs) × Profit Percentage
 
 ## Project Setup
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- npm or yarn
+- .NET 6.0 or later
+- Node.js and npm
+- Angular CLI
 - Git
-- [Additional backend requirements]
 
-### Backend Setup
+### Backend Setup (ASP.NET Core)
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/3d-print-calculator.git
-cd 3d-print-calculator/backend
+git clone https://github.com/yourusername/3d-printer-cost-calculator.git
+cd 3d-printer-cost-calculator
+
+# Build and run the application
+dotnet build
+dotnet run
+```
+
+### Frontend Setup (Angular)
+
+```bash
+# Navigate to ClientApp directory
+cd ClientApp
 
 # Install dependencies
 npm install
 
-# Configure environment
-cp .env.example .env
-# Edit .env with your configuration
-
-# Run development server
-npm run dev
+# Start Angular development server
+npm start
 ```
 
-### Frontend Setup
+### Development Server
+
+The application can be run in development mode with:
 
 ```bash
-# Navigate to frontend directory
-cd ../frontend
-
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
+dotnet run
 ```
 
-### Configuration
-
-- Backend configuration is managed through environment variables
-- Frontend configuration is located in `src/config.js`
-
-## Testing
-
-### Backend Tests
-
-```bash
-cd backend
-npm run test
-```
-
-### Frontend Tests
-
-```bash
-cd frontend
-npm run test
-```
-
-### End-to-End Tests
-
-```bash
-npm run test:e2e
-```
+This will start both the ASP.NET Core backend and Angular frontend through the proxy configuration.
 
 ## Contributing
 
-1. Ensure you've read our git workflow documentation
-2. Create a feature branch from main
-3. Make your changes following our coding standards
-4. Write or update tests as needed
-5. Create a pull request with a clear description of changes
-6. Address review feedback
+1. Fork the repository
+2. Create your feature branch following our branching strategy
+3. Implement your changes with appropriate tests
+4. Ensure existing tests pass: `dotnet test`
+5. Submit a pull request
+
+Please adhere to our coding standards and commit message guidelines.
 
 ## License
 
 [Specify license here]
 
-# _3d_print_cost_calculator
+---
+
+# Angular Specific Information
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.0.2.
 

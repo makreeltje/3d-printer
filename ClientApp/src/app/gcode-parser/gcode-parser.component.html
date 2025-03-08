@@ -1,0 +1,256 @@
+<div class="container">
+  <h1>GCODE File Parser and Cost Calculator</h1>
+  <p>Upload a GCODE file to analyze it and calculate printing costs</p>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h2>Upload GCODE File</h2>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label for="fileInput">Select GCODE file</label>
+            <input type="file" id="fileInput" class="form-control-file" 
+                  (change)="onFileSelected($event)" accept=".gcode">
+            <small class="form-text text-muted">
+              Only .gcode files are supported
+            </small>
+          </div>
+          
+          <button class="btn btn-primary mt-3" 
+                 [disabled]="isUploading || !selectedFile" 
+                 (click)="uploadFile()">
+            <span *ngIf="isUploading">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Uploading...
+            </span>
+            <span *ngIf="!isUploading">Upload and Parse</span>
+          </button>
+          
+          <div *ngIf="uploadError" class="alert alert-danger mt-3">
+            {{ uploadError }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6" *ngIf="parsedGCodeFile">
+      <div class="card">
+        <div class="card-header">
+          <h2>GCODE Analysis Results</h2>
+        </div>
+        <div class="card-body">
+          <h3>{{ parsedGCodeFile.filename }}</h3>
+          <table class="table">
+            <tbody>
+              <tr>
+                <th>Filament Usage</th>
+                <td>{{ parsedGCodeFile.filamentUsageLength.toFixed(2) }} mm 
+                    ({{ parsedGCodeFile.filamentUsageWeight.toFixed(2) }} g)</td>
+              </tr>
+              <tr>
+                <th>Estimated Print Time</th>
+                <td>{{ parsedGCodeFile.estimatedPrintTime }}</td>
+              </tr>
+              <tr>
+                <th>Layer Count</th>
+                <td>{{ parsedGCodeFile.layerCount }}</td>
+              </tr>
+              <tr>
+                <th>Layer Height</th>
+                <td>{{ parsedGCodeFile.layerHeight.toFixed(2) }} mm</td>
+              </tr>
+              <tr>
+                <th>Nozzle Temperature</th>
+                <td>{{ parsedGCodeFile.nozzleTemperature }}°C</td>
+              </tr>
+              <tr>
+                <th>Bed Temperature</th>
+                <td>{{ parsedGCodeFile.bedTemperature }}°C</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4" *ngIf="parsedGCodeFile">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h2>Cost Calculation Parameters</h2>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="costForm">
+            <div class="form-group">
+              <label for="materialCost">Material Cost (per kg)</label>
+              <div class="input-group">
+                <input type="number" id="materialCost" class="form-control" 
+                       formControlName="materialCostPerKg" min="0" step="0.01">
+                <div class="input-group-append">
+                  <span class="input-group-text">{{ costForm.value.currency }}/kg</span>
+                </div>
+              </div>
+              <small class="text-danger" *ngIf="costForm.get('materialCostPerKg')?.invalid && costForm.get('materialCostPerKg')?.touched">
+                Please enter a valid material cost.
+              </small>
+            </div>
+
+            <div class="form-group mt-2">
+              <label for="electricityCost">Electricity Cost (per kWh)</label>
+              <div class="input-group">
+                <input type="number" id="electricityCost" class="form-control" 
+                       formControlName="electricityCostPerKwh" min="0" step="0.01">
+                <div class="input-group-append">
+                  <span class="input-group-text">{{ costForm.value.currency }}/kWh</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group mt-2">
+              <label for="printerCost">Printer Cost</label>
+              <div class="input-group">
+                <input type="number" id="printerCost" class="form-control" 
+                       formControlName="printerCost" min="0" step="1">
+                <div class="input-group-append">
+                  <span class="input-group-text">{{ costForm.value.currency }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group mt-2">
+              <label for="printerLifespan">Printer Lifespan (hours)</label>
+              <input type="number" id="printerLifespan" class="form-control" 
+                     formControlName="printerLifespan" min="0" step="1">
+            </div>
+
+            <div class="form-group mt-2">
+              <label for="printerPower">Printer Power Consumption (kW)</label>
+              <input type="number" id="printerPower" class="form-control" 
+                     formControlName="printerPowerConsumption" min="0" step="0.001">
+            </div>
+
+            <div class="form-group mt-2">
+              <label for="laborCost">Labor Cost (per hour)</label>
+              <div class="input-group">
+                <input type="number" id="laborCost" class="form-control" 
+                       formControlName="laborCostPerHour" min="0" step="0.01">
+                <div class="input-group-append">
+                  <span class="input-group-text">{{ costForm.value.currency }}/hour</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group mt-2">
+              <label for="laborTime">Labor Time (hours)</label>
+              <input type="number" id="laborTime" class="form-control" 
+                     formControlName="laborTime" min="0" step="0.01">
+            </div>
+
+            <div class="form-group mt-2">
+              <label for="currency">Currency</label>
+              <select id="currency" class="form-control" formControlName="currency">
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="CAD">CAD ($)</option>
+                <option value="AUD">AUD ($)</option>
+                <!-- Add more currencies as needed -->
+              </select>
+            </div>
+
+            <button type="button" class="btn btn-success mt-3" 
+                    [disabled]="costForm.invalid" 
+                    (click)="calculateCost()">
+              Calculate Cost
+            </button>
+            
+            <div *ngIf="calculationError" class="alert alert-danger mt-3">
+              {{ calculationError }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6" *ngIf="costCalculation">
+      <div class="card">
+        <div class="card-header">
+          <h2>Cost Breakdown</h2>
+        </div>
+        <div class="card-body">
+          <table class="table">
+            <tbody>
+              <tr>
+                <th>Material Cost</th>
+                <td>{{ costCalculation.materialCost.toFixed(2) }} {{ costCalculation.currency }}</td>
+              </tr>
+              <tr>
+                <th>Electricity Cost</th>
+                <td>{{ costCalculation.electricityCost.toFixed(2) }} {{ costCalculation.currency }}</td>
+              </tr>
+              <tr>
+                <th>Depreciation Cost</th>
+                <td>{{ costCalculation.depreciationCost.toFixed(2) }} {{ costCalculation.currency }}</td>
+              </tr>
+              <tr>
+                <th>Labor Cost</th>
+                <td>{{ costCalculation.laborCost.toFixed(2) }} {{ costCalculation.currency }}</td>
+              </tr>
+              <tr class="table-active font-weight-bold">
+                <th>Total Cost</th>
+                <td class="total-cost">{{ costCalculation.totalCost.toFixed(2) }} {{ costCalculation.currency }}</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div class="cost-chart mt-4">
+            <h3>Cost Distribution</h3>
+            <!-- You can implement a chart here using a library like chart.js -->
+            <div class="progress-bars">
+              <div class="progress-label">Material</div>
+              <div class="progress mb-2">
+                <div class="progress-bar bg-primary" 
+                     [style.width.%]="getMaterialCostPercentage()">
+                  {{ getMaterialCostPercentage().toFixed(1) }}%
+                </div>
+              </div>
+              
+              <div class="progress-label">Electricity</div>
+              <div class="progress mb-2">
+                <div class="progress-bar bg-success" 
+                     [style.width.%]="getElectricityCostPercentage()">
+                  {{ getElectricityCostPercentage().toFixed(1) }}%
+                </div>
+              </div>
+              
+              <div class="progress-label">Depreciation</div>
+              <div class="progress mb-2">
+                <div class="progress-bar bg-info" 
+                     [style.width.%]="getDepreciationCostPercentage()">
+                  {{ getDepreciationCostPercentage().toFixed(1) }}%
+                </div>
+              </div>
+              
+              <div class="progress-label">Labor</div>
+              <div class="progress mb-2">
+                <div class="progress-bar bg-warning" 
+                     [style.width.%]="getLaborCostPercentage()">
+                  {{ getLaborCostPercentage().toFixed(1) }}%
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-4">
+            <button class="btn btn-outline-secondary" (click)="exportCostReport()">
+              Export Report
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

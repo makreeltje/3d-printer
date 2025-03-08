@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "Hash": "JMoZI76s2GXdN1dUkLpbdfyPYd/OOd+V949zRXOswjM=",
+  "Source": "3d-printer-cost-calculator",
+  "BasePath": "_content/3d-printer-cost-calculator",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "3d-printer-cost-calculator/wwwroot",
+      "Source": "3d-printer-cost-calculator",
+      "ContentRoot": "/Users/makreeltje/Git/Personal/3d-printer/wwwroot/",
+      "BasePath": "_content/3d-printer-cost-calculator",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "/Users/makreeltje/Git/Personal/3d-printer/wwwroot/favicon.ico",
+      "SourceId": "3d-printer-cost-calculator",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/makreeltje/Git/Personal/3d-printer/wwwroot/",
+      "BasePath": "_content/3d-printer-cost-calculator",
+      "RelativePath": "favicon.ico",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/favicon.ico"
+    }
+  ]
+}
