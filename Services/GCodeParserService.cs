@@ -23,7 +23,7 @@ namespace _3d_printer_cost_calculator.Services
         {
             try
             {
-                _logger.LogInformation($"Parsing GCODE file: {fileName}");
+                _logger.LogInformation("Parsing GCODE file: {FileName}", fileName);
 
                 using var reader = new StreamReader(fileStream);
                 var content = await reader.ReadToEndAsync();
@@ -33,9 +33,9 @@ namespace _3d_printer_cost_calculator.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error parsing GCODE file: {fileName}");
-                throw;
+                _logger.LogError(ex, "Error parsing GCODE file: {FileName}", fileName);
             }
+            return null!;
         }
 
         public GCodeFile ParseGCodeFile(string[] lines, string fileName)
@@ -49,7 +49,7 @@ namespace _3d_printer_cost_calculator.Services
             // Initialize variables to track during parsing
             double filamentLength = 0;
             double filamentDiameter = 0; // Default value
-            double filamentDensity = 0; // Default PLA density (g/cm³)
+            // Default PLA density (g/cm³)
             double layerHeight = 0; // Default value
             int layerCount = 0;
             double nozzleTemp = 0;
@@ -59,7 +59,7 @@ namespace _3d_printer_cost_calculator.Services
             double infillPercentage = 0;
             string slicerSoftware = "Unknown";
             string filamentType = "Unknown";
-            string thumbnailBase64 = null;
+            string? thumbnailBase64 = null;
 
             // Pattern matching for common slicer comments
             var estimatedTimePattern = new Regex(@"estimated printing time.*?=\s*(([\d]+)h)?\s*(([\d]+)m)?\s*(([\d]+)s)?", RegexOptions.IgnoreCase);
@@ -67,7 +67,7 @@ namespace _3d_printer_cost_calculator.Services
             var filamentWeightPattern = new Regex(@"filament.*?used.*?\[g\].*?=\s*([\d\.\,\s]+)", RegexOptions.IgnoreCase);
             var layerHeightPattern = new Regex(@"; layer.*?height.*?(\d+\.?\d*)", RegexOptions.IgnoreCase);
             var filamentDiameterPattern = new Regex(@"filament.*?diameter.*?(\d+\.?\d*)", RegexOptions.IgnoreCase);
-            var slicerPattern = new Regex(@"generated.*?(Cura|PrusaSlicer|Simplify3D|slic3r|IdeaMaker|OrcaSlicer)", RegexOptions.IgnoreCase);
+            var slicerPattern = new Regex(@"generated.*?(Cura|PrusaSlicer|Simplify3D|slic3r|IdeaMaker|OrcaSlicer|Creality_Print)", RegexOptions.IgnoreCase);
             // Updated pattern to better match temperature commands in GCODE
             var nozzleTempPattern = new Regex(@"EXTRUDER_TEMP=(\d+\.?\d*)", RegexOptions.IgnoreCase);
             var bedTempPattern = new Regex(@"BED_TEMP=(\d+\.?\d*)", RegexOptions.IgnoreCase);
@@ -79,7 +79,6 @@ namespace _3d_printer_cost_calculator.Services
             var thumbnailStartPattern = new Regex(@"; thumbnail begin (\d+)x(\d+) (\d+)", RegexOptions.IgnoreCase);
             var thumbnailEndPattern = new Regex(@"; thumbnail end", RegexOptions.IgnoreCase);
 
-            double lastE = 0;
 
             // Extract thumbnail data
             bool inThumbnail = false;
@@ -119,11 +118,10 @@ namespace _3d_printer_cost_calculator.Services
                         {
                             thumbnailBase64 = thumbnailData.ToString();
                         }
-                        continue;
                     }
                     
                     // Inside thumbnail section - collect the data
-                    if (line.StartsWith(";"))
+                    if (line.StartsWith(';'))
                     {
                         // Remove the leading semicolon and any whitespace
                         string cleanedLine = line.TrimStart(';', ' ', '\t');
@@ -141,24 +139,22 @@ namespace _3d_printer_cost_calculator.Services
 
                 // Check for filament type
                 var filamentTypeMatch = filamentTypePattern.Match(line);
-                if (filamentTypeMatch.Success)
+                if (filamentTypeMatch.Success && filamentTypeMatch.Groups[1].Success)
                 {
                     filamentType = filamentTypeMatch.Groups[1].Value;
                 }
 
                 // Extract layer height
                 var layerHeightMatch = layerHeightPattern.Match(line);
-                if (layerHeightMatch.Success)
+                if (layerHeightMatch.Success && double.TryParse(layerHeightMatch.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double parsedHeight))
                 {
-                    if (double.TryParse(layerHeightMatch.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double parsedHeight))
-                    {
-                        layerHeight = parsedHeight;
-                    }
+                    layerHeight = parsedHeight;
                 }
+                
                 var filamentDiameterMatch = filamentDiameterPattern.Match(line);
                 if (filamentDiameterMatch.Success && filamentDiameterMatch.Groups[1].Success)
                 {
-                    double.TryParse(filamentDiameterMatch.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out filamentDiameter);
+                    _ = double.TryParse(filamentDiameterMatch.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out filamentDiameter);
                 }
 
                 // Parse estimated printing time from comments
@@ -168,43 +164,28 @@ namespace _3d_printer_cost_calculator.Services
                     int hours = 0, minutes = 0, seconds = 0;
 
                     // Group 2, 4, 6 contain the actual numbers from the new regex pattern
-                    if (timeMatch.Groups[2].Success)
+                    if (timeMatch.Groups.Count > 2 && timeMatch.Groups[2].Success)
                     {
-                        int.TryParse(timeMatch.Groups[2].Value, out hours);
+                        _ = int.TryParse(timeMatch.Groups[2].Value, out hours);
                     }
 
-                    if (timeMatch.Groups[4].Success)
+                    if (timeMatch.Groups.Count > 4 && timeMatch.Groups[4].Success)
                     {
-                        int.TryParse(timeMatch.Groups[4].Value, out minutes);
+                        _ = int.TryParse(timeMatch.Groups[4].Value, out minutes);
                     }
 
-                    if (timeMatch.Groups[6].Success)
+                    if (timeMatch.Groups.Count > 6 && timeMatch.Groups[6].Success)
                     {
-                        int.TryParse(timeMatch.Groups[6].Value, out seconds);
+                        _ = int.TryParse(timeMatch.Groups[6].Value, out seconds);
                     }
                     estimatedTime = new TimeSpan(hours, minutes, seconds);
                 }
 
                 // Check for direct filament length information
                 var filamentLengthMatch = filamentUsedPattern.Match(line);
-                if (filamentLengthMatch.Success)
+                if (filamentLengthMatch.Success && filamentLengthMatch.Groups.Count > 1)
                 {
-                    // Split by comma to handle multiple values
-                    string[] values = filamentLengthMatch.Groups[1].Value.Split(',');
-                    
-                    // Find highest non-zero value
-                    double highestValue = 0;
-                    foreach (string val in values)
-                    {
-                        if (double.TryParse(val.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double parsedValue))
-                        {
-                            if (parsedValue > highestValue)
-                            {
-                                highestValue = parsedValue;
-                            }
-                        }
-                    }
-                    
+                    double highestValue = ExtractHighestValueFromCommaSeparatedList(filamentLengthMatch.Groups[1].Value);
                     if (highestValue > 0)
                     {
                         filamentLength = highestValue;
@@ -212,48 +193,21 @@ namespace _3d_printer_cost_calculator.Services
                 }
                 // Check for nozzle temperature
                 var nozzleTempMatch = nozzleTempPattern.Match(line);
-                if (nozzleTempMatch.Success)
+                if (nozzleTempMatch.Success && nozzleTempMatch.Groups.Count > 1)
                 {
-                    string tempValue = null;
-                    // Check each capture group in order
-                    for (int i = 1; i <= 4; i++)
-                    {
-                        if (nozzleTempMatch.Groups[i].Success)
-                        {
-                            tempValue = nozzleTempMatch.Groups[i].Value;
-                            break;
-                        }
-                    }
-                    
-                    if (tempValue != null && double.TryParse(tempValue, NumberStyles.Any, CultureInfo.InvariantCulture, out double parsedTemp))
-                    {
-                        nozzleTemp = parsedTemp;
-                    }
+                    nozzleTemp = ExtractTemperatureFromMatch(nozzleTempMatch);
                 }
+                
                 // Check for bed temperature
                 var bedTempMatch = bedTempPattern.Match(line);
-                if (bedTempMatch.Success)
+                if (bedTempMatch.Success && bedTempMatch.Groups.Count > 1)
                 {
-                    string tempValue = null;
-                    // Check each capture group in order
-                    for (int i = 1; i <= 4; i++)
-                    {
-                        if (bedTempMatch.Groups[i].Success)
-                        {
-                            tempValue = bedTempMatch.Groups[i].Value;
-                            break;
-                        }
-                    }
-                    
-                    if (tempValue != null && double.TryParse(tempValue, NumberStyles.Any, CultureInfo.InvariantCulture, out double parsedTemp))
-                    {
-                        bedTemp = parsedTemp;
-                    }
+                    bedTemp = ExtractTemperatureFromMatch(bedTempMatch);
                 }
                 var infillMatch = infillPattern.Match(line);
                 if (infillMatch.Success && infillMatch.Groups[1].Success)
                 {
-                    double.TryParse(infillMatch.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out infillPercentage);
+                    _ = double.TryParse(infillMatch.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out infillPercentage);
                 }
 
                 // Check if supports are used
@@ -265,13 +219,9 @@ namespace _3d_printer_cost_calculator.Services
 
                 // Check for total layers count information
                 var totalLayersMatch = totalLayersPattern.Match(line);
-                if (totalLayersMatch.Success)
+                if (totalLayersMatch.Success && totalLayersMatch.Groups[1].Success && int.TryParse(totalLayersMatch.Groups[1].Value, out int totalLayers))
                 {
-                    int totalLayers = 0;
-                    if (totalLayersMatch.Groups[1].Success && int.TryParse(totalLayersMatch.Groups[1].Value, out totalLayers))
-                    {
-                        layerCount = totalLayers;
-                    }
+                    layerCount = totalLayers;
                 }
             }
 
@@ -280,31 +230,12 @@ namespace _3d_printer_cost_calculator.Services
             
             // First try to parse filament weight directly from comments
             var filamentWeightMatch = filamentWeightPattern.Match(string.Join("\n", lines));
-            if (filamentWeightMatch.Success)
+            if (filamentWeightMatch.Success && filamentWeightMatch.Groups.Count > 1)
             {
-                // Split by comma to handle multiple values
-                string[] values = filamentWeightMatch.Groups[1].Value.Split(',');
-                
-                // Find highest non-zero value
-                double highestValue = 0;
-                foreach (string val in values)
-                {
-                    if (double.TryParse(val.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double parsedValue))
-                    {
-                        if (parsedValue > highestValue)
-                        {
-                            highestValue = parsedValue;
-                        }
-                    }
-                }
-                
-                if (highestValue > 0)
-                {
-                    filamentWeightGrams = highestValue;
-                }
+                filamentWeightGrams = ExtractHighestValueFromCommaSeparatedList(filamentWeightMatch.Groups[1].Value);
             }
 
-                // Set the parsed values to the GCodeFile object
+            // Set the parsed values to the GCodeFile object
             gCodeFile.FilamentUsageLength = filamentLength; // Store actual length in mm
             gCodeFile.FilamentUsageWeight = filamentWeightGrams; // Store actual weight in grams
             gCodeFile.EstimatedPrintTime = estimatedTime;
@@ -317,10 +248,59 @@ namespace _3d_printer_cost_calculator.Services
             gCodeFile.InfillPercentage = infillPercentage;
             gCodeFile.SlicerSoftware = slicerSoftware;
             gCodeFile.FilamentType = filamentType;
-            gCodeFile.ThumbnailBase64 = thumbnailBase64;
+            gCodeFile.ThumbnailBase64 = thumbnailBase64 ?? string.Empty;
 
-            _logger.LogInformation($"Successfully parsed GCODE file: {fileName}");
+            _logger.LogInformation("Successfully parsed GCODE file: {FileName}", fileName);
             return gCodeFile;
+        }
+
+        /// <summary>
+        /// Extracts temperature value from a regex match
+        /// </summary>
+        /// <param name="match">The regex match containing temperature information</param>
+        /// <returns>The extracted temperature value or 0 if parsing fails</returns>
+        private static double ExtractTemperatureFromMatch(Match match)
+        {
+            // Check each capture group in order
+            for (int i = 1; i < match.Groups.Count; i++)
+            {
+                if (match.Groups[i].Success)
+                {
+                    if (double.TryParse(match.Groups[i].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double parsedTemp))
+                    {
+                        return parsedTemp;
+                    }
+                    break;
+                }
+            }
+            
+            return 0;
+        }
+
+        /// <summary>
+        /// Extracts the highest value from a comma-separated list
+        /// </summary>
+        /// <param name="commaSeparatedValues">String containing comma-separated values</param>
+        /// <returns>The highest non-zero value found, or 0 if no valid values</returns>
+        private static double ExtractHighestValueFromCommaSeparatedList(string commaSeparatedValues)
+        {
+            if (string.IsNullOrEmpty(commaSeparatedValues))
+            {
+                return 0;
+            }
+
+            double highestValue = 0;
+            string[] values = commaSeparatedValues.Split(',');
+                
+            foreach (string val in values)
+            {
+                if (double.TryParse(val.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double parsedValue) && parsedValue > highestValue)
+                {
+                    highestValue = parsedValue;
+                }
+            }
+            
+            return highestValue;
         }
     }
 }

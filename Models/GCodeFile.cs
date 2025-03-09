@@ -7,7 +7,7 @@ namespace _3d_printer_cost_calculator.Models
         /// <summary>
         /// The name of the GCODE file
         /// </summary>
-        public string Filename { get; set; }
+        public string? Filename { get; set; } = string.Empty;
 
         /// <summary>
         /// Length of filament used in millimeters
@@ -17,7 +17,7 @@ namespace _3d_printer_cost_calculator.Models
         /// <summary>
         /// Filament type (PLA, ABS, PETG, etc.)
         /// </summary>
-        public string FilamentType { get; set; }
+        public string? FilamentType { get; set; } = string.Empty;
 
         /// <summary>
         /// Weight of filament used in grams
@@ -72,12 +72,12 @@ namespace _3d_printer_cost_calculator.Models
         /// <summary>
         /// The slicer software used to generate the GCODE
         /// </summary>
-        public string SlicerSoftware { get; set; }
+        public string? SlicerSoftware { get; set; } = string.Empty;
 
         /// <summary>
         /// Base64 encoded thumbnail image from the GCODE file
         /// </summary>
-        public string ThumbnailBase64 { get; set; }
+        public string? ThumbnailBase64 { get; set; } = string.Empty;
     }
 }
 
