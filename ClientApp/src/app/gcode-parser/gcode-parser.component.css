@@ -1,0 +1,98 @@
+.container {
+  padding: 20px 0;
+}
+
+h1 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.card {
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  padding: 12px 20px;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #495057;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.table th {
+  width: 40%;
+  font-weight: 600;
+}
+
+.progress {
+  height: 25px;
+  border-radius: 4px;
+}
+
+.progress-bar {
+  padding-left: 5px;
+  text-align: left;
+  line-height: 25px;
+  font-weight: 500;
+}
+
+.progress-label {
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+
+.total-cost {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #28a745;
+}
+
+button.btn {
+  font-weight: 500;
+}
+
+.btn-primary {
+  background-color: #007bff;
+}
+
+.btn-success {
+  background-color: #28a745;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mt-3 {
+  margin-top: 1rem;
+}
+
+.mt-4 {
+  margin-top: 1.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+  }
+  
+  .col-md-6 {
+    width: 100%;
+  }
+}
+

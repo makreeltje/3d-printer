@@ -1,0 +1,98 @@
+<div class="container">
+  <h1>GCODE File Parser and Cost Calculator</h1>
+  <p>Upload a GCODE file to analyze it and calculate printing costs</p>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h2>Upload GCODE File</h2>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label for="fileInput">Select GCODE file</label>
+            <input type="file" id="fileInput" class="form-control-file"
+                  (change)="onFileSelected($event)" accept=".gcode">
+            <small class="form-text text-muted">
+              Only .gcode files are supported
+            </small>
+          </div>
+
+          <button class="btn btn-primary mt-3"
+                 [disabled]="isUploading || !selectedFile"
+                 (click)="uploadFile()">
+            <span *ngIf="isUploading">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Uploading...
+            </span>
+            <span *ngIf="!isUploading">Upload and Parse</span>
+          </button>
+
+          <div *ngIf="uploadError" class="alert alert-danger mt-3">
+            {{ uploadError }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6" *ngIf="parsedGCodeFile">
+      <div class="card">
+        <div class="card-header">
+          <h2>GCODE Analysis Results</h2>
+        </div>
+        <div class="card-body">
+          <h3>{{ parsedGCodeFile.filename }}</h3>
+          <table class="table">
+            <tbody>
+              <tr>
+                <th>Filament Usage</th>
+                <td>{{ formatFilamentLength(parsedGCodeFile.filamentUsageLength) }}
+                    ({{ formatFilamentWeight(parsedGCodeFile.filamentUsageWeight) }})</td>
+              </tr>
+              <tr>
+                <th>Filament Type</th>
+                <td>{{ parsedGCodeFile.filamentType }}</td>
+              </tr>
+              <tr>
+                <th>Filament Diameter</th>
+                <td>{{ parsedGCodeFile.filamentDiameter }} mm</td>
+              </tr>
+              <tr>
+                <th>Infill Percentage</th>
+                <td>{{ parsedGCodeFile.infillPercentage }} %</td>
+              </tr>
+              <tr>
+                <th>Support Enabled</th>
+                <td>{{ parsedGCodeFile.hasSupport ? 'Yes' : 'No' }}</td>
+              </tr>
+              <tr>
+                <th>Estimated Print Time</th>
+                <td>{{ parsedGCodeFile.estimatedPrintTime }}</td>
+              </tr>
+              <tr>
+                <th>Layer Count</th>
+                <td>{{ parsedGCodeFile.layerCount }}</td>
+              </tr>
+              <tr>
+                <th>Layer Height</th>
+                <td>{{ formatLayerHeight(parsedGCodeFile.layerHeight) }}</td>
+              </tr>
+              <tr>
+                <th>Nozzle Temperature</th>
+                <td>{{ formatTemperature(parsedGCodeFile.nozzleTemperature) }}</td>
+              </tr>
+              <tr>
+                <th>Bed Temperature</th>
+                <td>{{ formatTemperature(parsedGCodeFile.bedTemperature) }}</td>
+              </tr>
+              <tr>
+                <th>Slicer Software</th>
+                <td>{{ parsedGCodeFile.slicerSoftware }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
