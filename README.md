@@ -15,55 +15,55 @@ This application helps 3D printing enthusiasts, small businesses, and service pr
 ### Phase 1: Core Functionality
 
 - **GCODE File Parser**
-  - Extract filament usage (length and weight)
-  - Extract estimated print time
-  - Extract layer information (count, heights)
-  - Extract print settings (temperature, speed, etc.)
+  - [x] Extract filament usage (length and weight)
+  - [x] Extract estimated print time
+  - [x] Extract layer information (count, heights)
+  - [x] Extract print settings (temperature, speed, etc.)
 
 - **Cost Calculation Engine**
-  - Material cost calculation (based on filament weight and price per kg)
-  - Electricity cost calculation (based on printer power consumption and print time)
-  - Machine depreciation calculation (based on printer cost and usage)
-  - Failure rate adjustment (risk factor for print failures)
+  - [ ] Material cost calculation (based on filament weight and price per kg)
+  - [ ] Electricity cost calculation (based on printer power consumption and print time)
+  - [ ] Machine depreciation calculation (based on printer cost and usage)
+  - [ ] Failure rate adjustment (risk factor for print failures)
 
 - **Basic User Interface**
-  - GCODE file upload/selection
-  - Material cost input (price per kg)
-  - Electricity cost input (price per kWh)
-  - Printer settings (power consumption, cost, etc.)
-  - Cost breakdown display
+  - [ ] GCODE file upload/selection
+  - [ ] Material cost input (price per kg)
+  - [ ] Electricity cost input (price per kWh)
+  - [ ] Printer settings (power consumption, cost, etc.)
+  - [ ] Cost breakdown display
 
 ### Phase 2: Advanced Features
 
 - **Printer Profiles**
-  - Save multiple printer configurations
-  - Different power consumption rates
-  - Specific maintenance costs
+  - [ ] Save multiple printer configurations
+  - [ ] Different power consumption rates
+  - [ ] Specific maintenance costs
 
 - **Material Profiles**
-  - Manage different filament types and their costs
-  - Account for different densities and properties
+  - [ ] Manage different filament types and their costs
+  - [ ] Account for different densities and properties
 
 - **Project Management**
-  - Save projects and their cost calculations
-  - Compare different print settings for cost optimization
-  - Batch processing of multiple GCODE files
+  - [ ] Save projects and their cost calculations
+  - [ ] Compare different print settings for cost optimization
+  - [ ] Batch processing of multiple GCODE files
 
 - **Enhanced Analytics**
-  - Visualize cost breakdowns
-  - Track printing costs over time
-  - Compare different slicing settings for cost efficiency
+  - [ ] Visualize cost breakdowns
+  - [ ] Track printing costs over time
+  - [ ] Compare different slicing settings for cost efficiency
 
 ### Phase 3: Professional Features
 
 - **Business Tools**
-  - Generate quotes for clients
-  - Export cost reports (PDF, CSV)
-  - Profit margin calculation
+  - [ ] Generate quotes for clients
+  - [ ] Export cost reports (PDF, CSV)
+  - [ ] Profit margin calculation
 
 - **Integration with Slicers**
-  - Direct connection to popular slicers
-  - Real-time cost calculation as settings change
+  - [ ] Direct connection to popular slicers
+  - [ ] Real-time cost calculation as settings change
 
 - **Multi-material Support**
   - Calculate costs for multi-material/multi-extruder prints
