@@ -8,6 +8,7 @@ import { AppComponent } from './app.component';
 import { NavMenuComponent } from './nav-menu/nav-menu.component';
 import { HomeComponent } from './home/home.component';
 import { GcodeParserComponent } from './gcode-parser/gcode-parser.component';
+import { GcodeUploaderComponent } from './gcode-uploader/gcode-uploader.component';
 import { GcodeService } from './services/gcode.service';
 
 @NgModule({
@@ -15,7 +16,8 @@ import { GcodeService } from './services/gcode.service';
     AppComponent,
     NavMenuComponent,
     HomeComponent,
-    GcodeParserComponent
+    GcodeParserComponent,
+    GcodeUploaderComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

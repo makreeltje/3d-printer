@@ -1,56 +1,42 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using _3d_printer_cost_calculator.Models;
-using _3d_printer_cost_calculator.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Services;
+using System.IO;
+using System.Threading.Tasks;
 
-namespace _3d_printer_cost_calculator.Controllers
+namespace Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class GCodeController : ControllerBase
     {
-        private readonly IGCodeParserService _gCodeParserService;
-        private readonly ILogger<GCodeController> _logger;
+        private readonly GCodeParserService _parserService;
 
-        public GCodeController(IGCodeParserService gCodeParserService, ILogger<GCodeController> logger)
+        public GCodeController()
         {
-            _gCodeParserService = gCodeParserService ?? throw new ArgumentNullException(nameof(gCodeParserService));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _parserService = new GCodeParserService();
         }
 
-        [HttpPost("upload")]
-        public async Task<IActionResult> UploadGCodeFile(IFormFile file)
+        [HttpPost("parse")]
+        public async Task<IActionResult> ParseGCode([FromForm] IFormFile file)
         {
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded.");
+
             try
             {
-                if (file == null || file.Length == 0)
-                {
-                    return BadRequest("No file uploaded");
-                }
-
-                // Check if it's a gcode file
-                string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-                if (extension != ".gcode" && extension != ".g")
-                {
-                    return BadRequest("Uploaded file is not a GCODE file");
-                }
-
-                // Parse the file
                 using var stream = file.OpenReadStream();
-                var gCodeFile = await _gCodeParserService.ParseGCodeFileAsync(stream, file.FileName);
-
-                return Ok(gCodeFile);
+                var result = await _parserService.ParseAsync(stream);
+                return Ok(result);
+            }
+            catch (NotSupportedException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing uploaded GCODE file");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error processing the GCODE file");
+                return StatusCode(500, new { error = "An unexpected error occurred.", details = ex.Message });
             }
         }
     }
 }
-
