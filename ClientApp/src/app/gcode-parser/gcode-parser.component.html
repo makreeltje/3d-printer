@@ -10,22 +10,22 @@
         </div>
         <div class="card-body">
           <div class="form-group">
-            <label for="fileInput">Select GCODE file</label>
+            <label for="fileInput">Select GCODE files (multiple allowed)</label>
             <input type="file" id="fileInput" class="form-control-file"
-                  (change)="onFileSelected($event)" accept=".gcode">
+                  (change)="onFileSelected($event)" accept=".gcode,.bgcode" multiple>
             <small class="form-text text-muted">
-              Only .gcode files are supported
+              Only .gcode/.bgcode files are supported. You can select multiple files or a whole folder.
             </small>
           </div>
 
           <button class="btn btn-primary mt-3"
-                 [disabled]="isUploading || !selectedFile"
-                 (click)="uploadFile()">
+                 [disabled]="isUploading || !selectedFiles.length"
+                 (click)="uploadFiles()">
             <span *ngIf="isUploading">
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               Uploading...
             </span>
-            <span *ngIf="!isUploading">Upload and Parse</span>
+            <span *ngIf="!isUploading">Upload and Parse All</span>
           </button>
 
           <div *ngIf="uploadError" class="alert alert-danger mt-3">
@@ -35,59 +35,35 @@
       </div>
     </div>
 
-    <div class="col-md-6" *ngIf="parsedGCodeFile">
-      <div class="card">
+    <div class="col-md-12" *ngIf="parsedResults.length">
+      <div class="card mt-4">
         <div class="card-header">
-          <h2>GCODE Analysis Results</h2>
+          <h2>Batch GCODE Analysis Results</h2>
         </div>
-        <div class="card-body">
-          <h3>{{ parsedGCodeFile.filename }}</h3>
-          <table class="table">
-            <tbody>
+        <div class="card-body table-responsive">
+          <table class="table table-bordered table-striped">
+            <thead>
               <tr>
-                <th>Filament Usage</th>
-                <td>{{ formatFilamentLength(parsedGCodeFile.filamentUsageLength) }}
-                    ({{ formatFilamentWeight(parsedGCodeFile.filamentUsageWeight) }})</td>
-              </tr>
-              <tr>
-                <th>Filament Type</th>
-                <td>{{ parsedGCodeFile.filamentType }}</td>
-              </tr>
-              <tr>
-                <th>Filament Diameter</th>
-                <td>{{ parsedGCodeFile.filamentDiameter }} mm</td>
-              </tr>
-              <tr>
-                <th>Infill Percentage</th>
-                <td>{{ parsedGCodeFile.infillPercentage }} %</td>
-              </tr>
-              <tr>
-                <th>Support Enabled</th>
-                <td>{{ parsedGCodeFile.hasSupport ? 'Yes' : 'No' }}</td>
-              </tr>
-              <tr>
+                <th>Filename</th>
+                <th *ngIf="hasAnyError()">Error</th>
+                <th>Slicer</th>
+                <th>Filament Used (g)</th>
+                <th>Filament Used (mm)</th>
                 <th>Estimated Print Time</th>
-                <td>{{ parsedGCodeFile.estimatedPrintTime }}</td>
-              </tr>
-              <tr>
                 <th>Layer Count</th>
-                <td>{{ parsedGCodeFile.layerCount }}</td>
               </tr>
-              <tr>
-                <th>Layer Height</th>
-                <td>{{ formatLayerHeight(parsedGCodeFile.layerHeight) }}</td>
-              </tr>
-              <tr>
-                <th>Nozzle Temperature</th>
-                <td>{{ formatTemperature(parsedGCodeFile.nozzleTemperature) }}</td>
-              </tr>
-              <tr>
-                <th>Bed Temperature</th>
-                <td>{{ formatTemperature(parsedGCodeFile.bedTemperature) }}</td>
-              </tr>
-              <tr>
-                <th>Slicer Software</th>
-                <td>{{ parsedGCodeFile.slicerSoftware }}</td>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of parsedResults">
+                <td>{{ r.filename }}</td>
+                <td *ngIf="hasAnyError()">
+                  <span *ngIf="r.error" class="text-danger">{{ r.error }}</span>
+                </td>
+                <td>{{ r.result?.slicer || '-' }}</td>
+                <td>{{ r.result?.filamentUsedGrams ?? '-' }}</td>
+                <td>{{ r.result?.filamentUsedMm ?? '-' }}</td>
+                <td>{{ r.result?.estimatedPrintTime ?? '-' }}</td>
+                <td>{{ r.result?.layerCount ?? '-' }}</td>
               </tr>
             </tbody>
           </table>

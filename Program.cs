@@ -3,7 +3,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<_3d_printer_cost_calculator.Services.IGCodeParserService, _3d_printer_cost_calculator.Services.GCodeParserService>();
 
 var app = builder.Build();
 
@@ -24,6 +23,5 @@ app.MapControllerRoute(
     pattern: "{controller}/{action=Index}/{id?}");
 
 app.MapFallbackToFile("index.html");
-;
 
-app.Run();
+await app.RunAsync();

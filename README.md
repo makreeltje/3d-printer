@@ -15,10 +15,13 @@ This application helps 3D printing enthusiasts, small businesses, and service pr
 ### Phase 1: Core Functionality
 
 - **GCODE File Parser**
+  - [x] Extract the used gcode parser
   - [x] Extract filament usage (length and weight)
   - [x] Extract estimated print time
   - [x] Extract layer information (count, heights)
-  - [x] Extract print settings (temperature, speed, etc.)
+  - [ ] Extract print settings (temperature, speed, etc.)
+
+> See PR #feature/gcode-parsing-enhancements for details on completed parser features.
 
 - **Cost Calculation Engine**
   - [ ] Material cost calculation (based on filament weight and price per kg)

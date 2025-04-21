@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { GcodeService, GCodeFile } from '../services/gcode.service';
+import { GcodeService, GCodeParseResult } from '../services/gcode.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
@@ -8,11 +8,14 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./gcode-parser.component.css']
 })
 export class GcodeParserComponent implements OnInit {
+  hasAnyError(): boolean {
+    return this.parsedResults.some(r => !!r.error);
+  }
   isUploading = false;
   uploadProgress = 0;
   uploadError = '';
-  selectedFile: File | null = null;
-  parsedGCodeFile: GCodeFile | null = null;
+  selectedFiles: File[] = [];
+  parsedResults: { filename: string, result: GCodeParseResult | null, error?: string }[] = [];
 
   // Form for cost calculation parameters
   costForm: FormGroup;
@@ -39,40 +42,47 @@ export class GcodeParserComponent implements OnInit {
   }
 
   onFileSelected(event: any): void {
-    this.selectedFile = event.target.files[0] as File;
-    // Reset any previous data
-    this.parsedGCodeFile = null;
+    this.selectedFiles = Array.from(event.target.files) as File[];
+    this.parsedResults = [];
     this.uploadError = '';
   }
 
-  uploadFile(): void {
-    if (!this.selectedFile) {
-      this.uploadError = 'Please select a file first';
-      return;
-    }
-
-    // Check file type
-    if (!this.selectedFile.name.toLowerCase().endsWith('.gcode')) {
-      this.uploadError = 'Please select a valid GCODE file (.gcode)';
+  uploadFiles(): void {
+    if (!this.selectedFiles || this.selectedFiles.length === 0) {
+      this.uploadError = 'Please select one or more files first';
       return;
     }
 
     this.isUploading = true;
     this.uploadProgress = 0;
     this.uploadError = '';
+    this.parsedResults = [];
 
-    // Upload the file
-    this.gcodeService.uploadGCodeFile(this.selectedFile).subscribe({
-      next: (result) => {
-        this.isUploading = false;
-        this.uploadProgress = 100;
-        this.parsedGCodeFile = result;
-      },
-      error: (error) => {
-        this.isUploading = false;
-        this.uploadError = `Error uploading file: ${error.message || 'Unknown error'}`;
-        console.error('Error uploading GCODE file:', error);
+    let completed = 0;
+    const total = this.selectedFiles.length;
+
+    this.selectedFiles.forEach(file => {
+      if (!file.name.toLowerCase().endsWith('.gcode') && !file.name.toLowerCase().endsWith('.bgcode')) {
+        this.parsedResults.push({ filename: file.name, result: null, error: 'Not a GCODE file' });
+        completed++;
+        if (completed === total) this.isUploading = false;
+        return;
       }
+      this.gcodeService.parseGCodeFile(file).subscribe({
+        next: (result: GCodeParseResult) => {
+          this.parsedResults.push({ filename: file.name, result });
+          completed++;
+          this.uploadProgress = Math.round((completed / total) * 100);
+          if (completed === total) this.isUploading = false;
+        },
+        error: (error: any) => {
+          const backendError = error?.error?.error;
+          this.parsedResults.push({ filename: file.name, result: null, error: backendError || error?.message || 'Parse error' });
+          completed++;
+          this.uploadProgress = Math.round((completed / total) * 100);
+          if (completed === total) this.isUploading = false;
+        }
+      });
     });
   }
 
