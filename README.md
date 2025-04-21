@@ -24,9 +24,9 @@ This application helps 3D printing enthusiasts, small businesses, and service pr
 > See PR #feature/gcode-parsing-enhancements for details on completed parser features.
 
 - **Cost Calculation Engine**
-  - [ ] Material cost calculation (based on filament weight and price per kg)
-  - [ ] Electricity cost calculation (based on printer power consumption and print time)
-  - [ ] Machine depreciation calculation (based on printer cost and usage)
+  - [x] Material cost calculation (based on filament weight and price per kg)
+  - [x] Electricity cost calculation (based on printer power consumption and print time)
+  - [x] Machine depreciation calculation (based on printer cost and usage)
   - [ ] Failure rate adjustment (risk factor for print failures)
 
 - **Basic User Interface**
