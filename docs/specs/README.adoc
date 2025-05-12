@@ -1,0 +1,30 @@
+= Architecture Specifications Index
+:toc:
+
+This folder contains versioned and structured architecture specifications for major system components and features.
+
+Each document follows a standard format including:
+- Background
+- MoSCoW Requirements
+- Method (Technical Architecture)
+- Implementation Details
+- Milestones
+- Gathering Results
+
+== Available Specifications
+
+[cols="1,3,1", options="header"]
+|===
+| Spec ID | Title | Status
+
+| SPEC-001
+| 3D Printer Cost Calculator
+| ✅ In Progress
+
+// Future specs can be added below
+
+// | SPEC-002
+// | Print Analytics and Visualization System
+// | 🔜 Planned
+
+|===
