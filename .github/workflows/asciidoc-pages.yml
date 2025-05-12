@@ -5,6 +5,7 @@ on:
     branches: [develop]
     paths:
       - 'docs/specs/**/*.adoc'
+      - 'docs/specs/index.html'
   workflow_dispatch:
 
 jobs:
@@ -19,22 +20,15 @@ jobs:
       - name: Install Asciidoctor
         run: sudo apt-get install -y asciidoctor
 
-      - name: Generate HTML from AsciiDoc
+      - name: Generate HTML from .adoc files
         run: |
           mkdir -p public
           for file in docs/specs/*.adoc; do
-            out="public/$(basename "${file%.adoc}.html")"
-            asciidoctor -o "$out" "$file"
+            asciidoctor -o "public/$(basename "${file%.adoc}.html")" "$file"
           done
 
-      - name: Add Index Page
-        run: |
-          echo "<h1>Specs</h1><ul>" > public/index.html
-          for html in public/*.html; do
-            name=$(basename "$html")
-            echo "<li><a href='$name'>$name</a></li>" >> public/index.html
-          done
-          echo "</ul>" >> public/index.html
+      - name: Copy custom index.html
+        run: cp docs/specs/index.html public/index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
