@@ -1,0 +1,17 @@
+name: Trigger Spec Rebuild on New Spec
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+
+jobs:
+  trigger-deploy:
+    if: contains(github.event.issue.labels.*.name, 'spec')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call spec deployment workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: asciidoc-pages.yml
+          repo: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-name: Build & Deploy Specs
+name: Build & Deploy Specs with Styled Index
 
 on:
   push:
@@ -18,9 +18,9 @@ jobs:
       - name: Copy stylesheet
         run: |
           mkdir -p public
-          curl -sSL https://raw.githubusercontent.com/asciidoctor/asciidoctor/refs/heads/v2.0.x/src/stylesheets/asciidoctor.css -o public/asciidoctor.css
+          curl -sSL https://raw.githubusercontent.com/asciidoctor/asciidoctor/v2.0.20/data/stylesheets/asciidoctor.css -o public/asciidoctor.css
 
-      - name: Convert .adoc files to HTML
+      - name: Convert .adoc specs to HTML
         run: |
           mkdir -p public
           for file in docs/specs/*.adoc; do
@@ -28,14 +28,23 @@ jobs:
             asciidoctor -a stylesheet=asciidoctor.css -a linkcss -o "$out" "$file"
           done
 
-      - name: Generate index.html
+      - name: Generate index.adoc dynamically
         run: |
-          echo "<!DOCTYPE html><html><head><title>Specs</title><link rel='stylesheet' href='asciidoctor.css'></head><body><h1>Specs</h1><ul>" > public/index.html
-          for html in public/*.html; do
-            name=$(basename "$html")
-            echo "<li><a href='$name'>$name</a></li>" >> public/index.html
+          echo "= 3D Printer Cost Calculator Specs Index" > docs/specs/index.adoc
+          echo ":toc:" >> docs/specs/index.adoc
+          echo ":stylesheet: asciidoctor.css" >> docs/specs/index.adoc
+          echo ":linkcss:" >> docs/specs/index.adoc
+          echo "" >> docs/specs/index.adoc
+          echo "== Available Specifications" >> docs/specs/index.adoc
+          for file in docs/specs/SPEC-*.adoc; do
+            name=$(basename "$file" .adoc)
+            title=$(grep -m1 "^= " "$file" | sed 's/^= //')
+            echo "* link:${name}.html[${title:-$name}]" >> docs/specs/index.adoc
           done
-          echo "</ul></body></html>" >> public/index.html
+
+      - name: Convert index.adoc to styled HTML
+        run: |
+          asciidoctor -a stylesheet=asciidoctor.css -a linkcss -o public/index.html docs/specs/index.adoc
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
