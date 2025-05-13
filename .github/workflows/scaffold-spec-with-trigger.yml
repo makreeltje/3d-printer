@@ -40,7 +40,7 @@ jobs:
           COMMENT_URL="https://makreeltje.github.io/3d-printer/SPEC-${ISSUE_NUMBER}-${SAFE_TITLE}.html"
           gh issue comment "$ISSUE_NUMBER" --repo ${{ github.repository }} --body "📄 Spec document scaffolded: [SPEC-${ISSUE_NUMBER}](\${COMMENT_URL})"
 
-      - name: Trigger spec deployment
+      - name: Trigger HTML spec deployment
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: asciidoc-pages.yml

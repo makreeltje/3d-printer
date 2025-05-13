@@ -1,0 +1,33 @@
+---
+name: Feature Spec Request
+about: Propose a new feature or spec for the 3D Printer Cost Calculator
+title: "[SPEC] "
+labels: [spec]
+assignees: ''
+
+---
+
+## ✨ Feature Overview
+
+Briefly describe the feature or problem to be addressed.
+
+## 🎯 Goals
+
+What do you want to achieve with this feature?
+
+## 🧰 Related Areas
+
+- [ ] Frontend (Angular)
+- [ ] Backend (.NET)
+- [ ] Analytics
+- [ ] Profiles
+- [ ] Folder Parsing
+- [ ] Documentation
+
+## 📁 Related Files or Specs
+
+List any related GCODE samples, folders, or specs.
+
+## 🔖 Additional Context
+
+Add any other context, links, screenshots, or examples.
