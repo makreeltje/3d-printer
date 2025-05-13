@@ -14,6 +14,8 @@ Documentation is maintained as versioned specs in AsciiDoc format:
 ## CI/CD Status
 
 ![Validate Pull Request Checklist](https://github.com/makreeltje/3d-printer/actions/workflows/validate-pr-checklist.yml/badge.svg)
+![Deploy Specs to GitHub Pages](https://github.com/makreeltje/3d-printer/actions/workflows/asciidoc-pages.yml/badge.svg)
+![Test Coverage](https://img.shields.io/badge/coverage-pending-lightgrey)
 
 ---
 
