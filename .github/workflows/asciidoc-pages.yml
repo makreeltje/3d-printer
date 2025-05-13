@@ -5,6 +5,7 @@ on:
     branches: [develop]
     paths:
       - 'docs/specs/*.adoc'
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
