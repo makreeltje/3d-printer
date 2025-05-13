@@ -10,6 +10,11 @@ Documentation is maintained as versioned specs in AsciiDoc format:
 
 🔗 **Live Specs**: [https://makreeltje.github.io/3d-printer/](https://makreeltje.github.io/3d-printer/)
 
+
+## CI/CD Status
+
+![Validate Pull Request Checklist](https://github.com/makreeltje/3d-printer/actions/workflows/validate-pr-checklist.yml/badge.svg)
+
 ---
 
 ## 🛠️ Setup Instructions
