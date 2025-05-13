@@ -10,12 +10,15 @@ Documentation is maintained as versioned specs in AsciiDoc format:
 
 🔗 **Live Specs**: [https://makreeltje.github.io/3d-printer/](https://makreeltje.github.io/3d-printer/)
 
-
 ## CI/CD Status
 
 ![Validate Pull Request Checklist](https://github.com/makreeltje/3d-printer/actions/workflows/validate-pr-checklist.yml/badge.svg)
 ![Deploy Specs to GitHub Pages](https://github.com/makreeltje/3d-printer/actions/workflows/asciidoc-pages.yml/badge.svg)
 ![Test Coverage](https://img.shields.io/badge/coverage-pending-lightgrey)
+
+## 🧭 Project Setup
+
+See [PROJECT-SETUP.md](PROJECT-SETUP.md) for a full checklist of GitHub Actions, issue templates, and labels configured for this project.
 
 ---
 
