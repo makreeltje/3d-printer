@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.20">
+<title>Contributing Guidelines</title>
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Contributing Guidelines</h1>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_overview">1. Overview</a></li>
+<li><a href="#_environment_setup">2. Environment Setup</a>
+<ul class="sectlevel2">
+<li><a href="#_backend_net_core">2.1. Backend (.NET Core)</a></li>
+<li><a href="#_frontend_angular">2.2. Frontend (Angular)</a></li>
+</ul>
+</li>
+<li><a href="#_directory_structure">3. Directory Structure</a></li>
+<li><a href="#_running_tests">4. Running Tests</a>
+<ul class="sectlevel2">
+<li><a href="#_backend">4.1. Backend</a></li>
+<li><a href="#_frontend">4.2. Frontend</a></li>
+</ul>
+</li>
+<li><a href="#_git_flow">5. Git Flow</a></li>
+<li><a href="#_pull_request_checklist">6. Pull Request Checklist</a></li>
+<li><a href="#_automation">7. Automation</a></li>
+<li><a href="#_need_help">8. Need Help?</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_overview">1. Overview</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We welcome contributions to improve the 3D Printer Cost Calculator — from core features to UI enhancements, testing, and documentation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_environment_setup">2. Environment Setup</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_backend_net_core">2.1. Backend (.NET Core)</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Install .NET 6.0+</p>
+</li>
+<li>
+<p>Use Visual Studio, Rider, or VS Code</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_frontend_angular">2.2. Frontend (Angular)</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Install Node.js + npm</p>
+</li>
+<li>
+<p>Angular CLI required</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_directory_structure">3. Directory Structure</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><code>src/</code> – ASP.NET Core backend</p>
+</li>
+<li>
+<p><code>ClientApp/</code> – Angular frontend</p>
+</li>
+<li>
+<p><code>docs/specs/</code> – AsciiDoc specs</p>
+</li>
+<li>
+<p><code>.github/workflows/</code> – CI/CD automation</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_running_tests">4. Running Tests</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_backend">4.1. Backend</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">dotnet test</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_frontend">4.2. Frontend</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">cd ClientApp
+ng test</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_git_flow">5. Git Flow</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Use these branches:
+- <code>main</code>: production
+- <code>develop</code>: integration
+- <code>feature/xyz</code>, <code>bugfix/abc</code>, <code>docs/&#8230;&#8203;</code></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_pull_request_checklist">6. Pull Request Checklist</h2>
+<div class="sectionbody">
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p>&#10063; Code compiles and passes tests</p>
+</li>
+<li>
+<p>&#10063; PR is based on <code>develop</code></p>
+</li>
+<li>
+<p>&#10063; Description is complete</p>
+</li>
+<li>
+<p>&#10063; Linked to issue(s)</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_automation">7. Automation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>GitHub Actions automate:
+- Spec publishing
+- Issue label tracking
+- CI pipeline</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_need_help">8. Need Help?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Open a discussion on GitHub or comment on an issue. Contributions are welcome at all levels.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2025-05-13 09:05:13 UTC
+</div>
+</div>
+</body>
+</html>
