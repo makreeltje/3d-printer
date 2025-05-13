@@ -23,8 +23,8 @@ Each document follows a standard format including:
 
 // Future specs can be added below
 
-// | SPEC-002
-// | Print Analytics and Visualization System
-// | 🔜 Planned
+| SPEC-002
+| Print Analytics and Visualization System
+| 🔜 Planned
 
 |===

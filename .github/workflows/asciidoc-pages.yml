@@ -18,7 +18,7 @@ jobs:
       - name: Copy stylesheet
         run: |
           mkdir -p public
-          curl -sSL https://raw.githubusercontent.com/asciidoctor/asciidoctor/master/data/stylesheets/asciidoctor.css -o public/asciidoctor.css
+          curl -sSL https://raw.githubusercontent.com/asciidoctor/asciidoctor/refs/heads/v2.0.x/src/stylesheets/asciidoctor.css -o public/asciidoctor.css
 
       - name: Convert .adoc files to HTML
         run: |
