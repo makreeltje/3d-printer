@@ -1,0 +1,39 @@
+name: Enhancement Suggestion
+description: Suggest a small improvement to an existing feature or UI
+title: "[ENHANCEMENT] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 💡 Suggestion Overview
+        Propose how to improve an existing feature or workflow.
+
+  - type: textarea
+    id: why
+    attributes:
+      label: 🤔 Why This Matters
+      description: Why would this help the user or system?
+
+  - type: textarea
+    id: how
+    attributes:
+      label: 🛠 How Should It Work
+      description: Describe what should be changed or added.
+
+  - type: checkboxes
+    id: related
+    attributes:
+      label: Related Areas
+      options:
+        - label: UI/UX
+        - label: GCODE Parser
+        - label: Cost Engine
+        - label: Data Storage
+        - label: File Upload or Folder Parsing
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 💬 Notes or Related Issues
+      description: Optional links, images, or references

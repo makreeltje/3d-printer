@@ -1,0 +1,26 @@
+name: Validate Pull Request Checklist
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  validate-checklist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required checklist items
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || "";
+            const requiredItems = [
+              "- [x] The code compiles and passes all tests",
+              "- [x] The PR is based on `develop`",
+              "- [x] Linked to a related issue (if applicable)"
+            ];
+            const missing = requiredItems.filter(item => !body.includes(item));
+            if (missing.length > 0) {
+              core.setFailed(`❌ Missing checklist items: ${missing.join(", ")}`);
+            } else {
+              console.log("✅ All required checklist items are present.");
+            }

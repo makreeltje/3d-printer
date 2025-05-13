@@ -1,0 +1,42 @@
+name: Feature Spec Request
+description: Propose a new feature or spec for the 3D Printer Cost Calculator
+title: "[SPEC] "
+labels: ["spec"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ✨ Feature Overview
+        Briefly describe the feature or problem to be addressed.
+
+  - type: textarea
+    id: goals
+    attributes:
+      label: 🎯 Goals
+      description: What do you want to achieve with this feature?
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: areas
+    attributes:
+      label: 🧰 Related Areas
+      options:
+        - label: Frontend (Angular)
+        - label: Backend (.NET)
+        - label: Analytics
+        - label: Profiles
+        - label: Folder Parsing
+        - label: Documentation
+
+  - type: textarea
+    id: related
+    attributes:
+      label: 📁 Related Files or Specs
+      description: Any linked GCODEs, URLs, or existing specs?
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 🔖 Additional Context
+      description: Add screenshots, links, or reasoning for the feature
