@@ -1,41 +1,41 @@
-name: Build & Deploy AsciiDoc to GitHub Pages
+name: Build & Deploy Specs
 
 on:
   push:
     branches: [develop]
     paths:
-      - 'docs/specs/**/*.adoc'
-      - 'docs/specs/index.html'
-  workflow_dispatch:
+      - 'docs/specs/*.adoc'
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    name: Generate HTML from AsciiDoc
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Install Asciidoctor
         run: sudo apt-get install -y asciidoctor
 
-      - name: Generate HTML from AsciiDoc
+      - name: Copy stylesheet
+        run: |
+          mkdir -p public
+          curl -sSL https://raw.githubusercontent.com/asciidoctor/asciidoctor/master/data/stylesheets/asciidoctor.css -o public/asciidoctor.css
+
+      - name: Convert .adoc files to HTML
         run: |
           mkdir -p public
           for file in docs/specs/*.adoc; do
             out="public/$(basename "${file%.adoc}.html")"
-            asciidoctor -o "$out" "$file"
+            asciidoctor -a stylesheet=asciidoctor.css -a linkcss -o "$out" "$file"
           done
 
-      - name: Add Index Page
+      - name: Generate index.html
         run: |
-          echo "<h1>Specs</h1><ul>" > public/index.html
+          echo "<!DOCTYPE html><html><head><title>Specs</title><link rel='stylesheet' href='asciidoctor.css'></head><body><h1>Specs</h1><ul>" > public/index.html
           for html in public/*.html; do
             name=$(basename "$html")
             echo "<li><a href='$name'>$name</a></li>" >> public/index.html
           done
-          echo "</ul>" >> public/index.html
+          echo "</ul></body></html>" >> public/index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
