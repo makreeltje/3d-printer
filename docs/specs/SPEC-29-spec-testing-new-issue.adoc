@@ -1,0 +1,31 @@
+= SPEC-XXX: <Title of Feature>
+:sectnums:
+:toc:
+
+== Background
+
+Describe the context or motivation for this spec.
+
+== Requirements
+
+List the requirements using MoSCoW prioritization.
+
+== Method
+
+Describe the method, approach, architecture, and design.
+
+== Implementation
+
+Outline concrete steps to implement the method above.
+
+== Milestones
+
+Break implementation into milestone stages.
+
+== Gathering Results
+
+Define how success and impact will be evaluated.
+
+== References
+
+link:contributing.html[Contributing Guidelines]
