@@ -1,0 +1,62 @@
+= Contributing Guidelines
+:toc:
+:sectnums:
+
+== Overview
+
+We welcome contributions to improve the 3D Printer Cost Calculator — from core features to UI enhancements, testing, and documentation.
+
+== Environment Setup
+
+=== Backend (.NET Core)
+* Install .NET 6.0+
+* Use Visual Studio, Rider, or VS Code
+
+=== Frontend (Angular)
+* Install Node.js + npm
+* Angular CLI required
+
+== Directory Structure
+
+* `src/` – ASP.NET Core backend
+* `ClientApp/` – Angular frontend
+* `docs/specs/` – AsciiDoc specs
+* `.github/workflows/` – CI/CD automation
+
+== Running Tests
+
+=== Backend
+```bash
+dotnet test
+```
+
+=== Frontend
+```bash
+cd ClientApp
+ng test
+```
+
+== Git Flow
+
+Use these branches:
+- `main`: production
+- `develop`: integration
+- `feature/xyz`, `bugfix/abc`, `docs/...`
+
+== Pull Request Checklist
+
+* [ ] Code compiles and passes tests
+* [ ] PR is based on `develop`
+* [ ] Description is complete
+* [ ] Linked to issue(s)
+
+== Automation
+
+GitHub Actions automate:
+- Spec publishing
+- Issue label tracking
+- CI pipeline
+
+== Need Help?
+
+Open a discussion on GitHub or comment on an issue. Contributions are welcome at all levels.
