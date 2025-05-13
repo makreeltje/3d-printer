@@ -1,0 +1,15 @@
+= [SPEC] new issue
+:sectnums:
+:toc:
+
+== Background
+
+== Requirements
+
+== Method
+
+== Implementation
+
+== Milestones
+
+== Gathering Results
