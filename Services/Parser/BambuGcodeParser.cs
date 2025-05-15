@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 using _3d_printer_cost_calculator.Models;
 
@@ -20,13 +21,15 @@ public class BambuGcodeParser : IGcodeParser
         foreach (var line in gcodeLines)
         {
             if (line.StartsWith("; total filament length [mm] : "))
-                parsed.FilamentUsedMm = double.Parse(line.Split(':').Last().Trim());
+                parsed.FilamentUsedMm = double.Parse(line.Split(':').Last().Trim(), CultureInfo.InvariantCulture);
             if (line.StartsWith("; total filament weight [g] : "))
-                parsed.FilamentUsedGrams = double.Parse(line.Split(':').Last().Trim());
+                parsed.FilamentUsedGrams = double.Parse(line.Split(':').Last().Trim(), CultureInfo.InvariantCulture);
             if (line.StartsWith("; estimated printing time (normal mode) = "))
                 parsed.EstimatedPrintTime = ParseTime(line.Split('=').Last().Trim());
             if (line.StartsWith("; total layer number: "))
-                parsed.LayerHeights.Add(double.Parse(line.Split(':').Last().Trim()));
+                parsed.LayerCount = int.Parse(line.Split(':').Last().Trim());
+            if (line.StartsWith("; layer_height = "))
+                parsed.LayerHeight = double.Parse(line.Split('=').Last().Trim(), CultureInfo.InvariantCulture);
             if (line.StartsWith("START_PRINT"))
             {
                 var match = Regex.Match(line, @"EXTRUDER_TEMP=(\d+)\s+BED_TEMP=(\d+)");
@@ -39,8 +42,6 @@ public class BambuGcodeParser : IGcodeParser
             if (line.StartsWith("; BambuStudio "))
                 parsed.SlicerVersion = line.Split(' ').Last().Trim();
         }
-        
-        parsed.LayerCount = parsed.LayerHeights.Count;
         return parsed;
     }
     

@@ -1,8 +1,13 @@
+using Services.Parser;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<GcodeParserSelector>();
+builder.Services.AddScoped<IGcodeParser, BambuGcodeParser>();
 
 var app = builder.Build();
 

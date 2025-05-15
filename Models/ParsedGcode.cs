@@ -6,11 +6,9 @@ public class ParsedGcode
     public double FilamentUsedGrams { get; set; }
     public TimeSpan EstimatedPrintTime { get; set; }
     public int LayerCount { get; set; }
-    public List<double> LayerHeights { get; set; } = new();
+    public double LayerHeight { get; set; }
     public int NozzleTemperature { get; set; }
     public int BedTemperature { get; set; }
-    public double AverageSpeed { get; set; }
-    public double FailureRiskScore { get; set; }
     public string SlicerName { get; set; } = string.Empty;
     public string SlicerVersion { get; set; } = string.Empty;
 }

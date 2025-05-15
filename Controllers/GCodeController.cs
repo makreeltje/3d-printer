@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Services;
 using System.IO;
 using System.Threading.Tasks;
+using _3d_printer_cost_calculator.Models;
+using Services.Parser;
 
 namespace Controllers
 {
@@ -10,32 +12,33 @@ namespace Controllers
     [Route("api/[controller]")]
     public class GCodeController : ControllerBase
     {
-        private readonly GCodeParserService _parserService;
+        private readonly GcodeParserSelector _parserSelector;
 
-        public GCodeController()
+        public GCodeController(GcodeParserSelector parserSelector)
         {
-            _parserService = new GCodeParserService();
+            _parserSelector = parserSelector;
         }
 
         [HttpPost("parse")]
-        public async Task<IActionResult> ParseGCode([FromForm] IFormFile file)
+        public async Task<ActionResult<ParsedGcode>> ParseGcode(IFormFile file)
         {
             if (file == null || file.Length == 0)
-                return BadRequest("No file uploaded.");
+            {
+                return BadRequest("No file provided");
+            }
+            
+            using var reader = new StreamReader(file.OpenReadStream());
+            var content = await reader.ReadToEndAsync();
+            var lines = content.Split('\n', '\r').Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
 
             try
             {
-                using var stream = file.OpenReadStream();
-                var result = await _parserService.ParseAsync(stream);
-                return Ok(result);
+                var parsed = _parserSelector.Parse(lines);
+                return Ok(parsed);
             }
             catch (NotSupportedException ex)
             {
-                return BadRequest(new { error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = "An unexpected error occurred.", details = ex.Message });
+                return BadRequest(ex.Message);
             }
         }
     }
