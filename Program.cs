@@ -8,6 +8,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<GcodeParserSelector>();
 builder.Services.AddScoped<IGcodeParser, BambuGcodeParser>();
+builder.Services.AddScoped<IGcodeParser, CrealityGcodeParser>();
 
 var app = builder.Build();
 
