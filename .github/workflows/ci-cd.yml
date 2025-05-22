@@ -41,11 +41,16 @@ jobs:
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
         echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-    
+
     - name: Install dependencies
       run: |
         uv sync
-    
+        pip install pytest
+
+    - name: Setup database roles
+      run: |
+        psql -U test_user -d test_db -c "CREATE ROLE root WITH LOGIN SUPERUSER PASSWORD 'root_password';"
+
     - name: Run tests with pytest
       env:
         DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
