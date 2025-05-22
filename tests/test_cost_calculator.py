@@ -19,7 +19,6 @@ class TestCostCalculationEngine:
             estimated_print_time=timedelta(hours=2),
             filament_used_grams=50.0,
             filament_used_millimeters=16000.0,
-            max_z_height=20.0,
             layer_count=100
         )
         
@@ -86,7 +85,6 @@ class TestCostCalculationEngine:
             estimated_print_time=timedelta(hours=1),
             filament_used_grams=10.0,
             filament_used_millimeters=3200.0,
-            max_z_height=5.0,
             layer_count=25
         )
         
@@ -126,7 +124,6 @@ class TestCostCalculationEngine:
             estimated_print_time=timedelta(hours=1),
             filament_used_grams=20.0,
             filament_used_millimeters=6400.0,
-            max_z_height=10.0,
             layer_count=50
         )
         
@@ -136,7 +133,6 @@ class TestCostCalculationEngine:
             estimated_print_time=timedelta(hours=2),
             filament_used_grams=40.0,
             filament_used_millimeters=12800.0,
-            max_z_height=20.0,
             layer_count=100
         )
         
@@ -169,7 +165,6 @@ class TestCostCalculationEngine:
             estimated_print_time=timedelta(hours=1),
             filament_used_grams=25.0,
             filament_used_millimeters=8000.0,
-            max_z_height=15.0,
             layer_count=75
         )
         
@@ -212,7 +207,6 @@ class TestCostCalculationEngine:
             estimated_print_time=timedelta(hours=1),
             filament_used_grams=30.0,
             filament_used_millimeters=9600.0,
-            max_z_height=12.0,
             layer_count=60
         )
         

@@ -305,9 +305,7 @@ class GenericGcodeParser(IGcodeParser):
         """Parse GCODE using generic extraction methods."""
         # Try to extract basic info using generic patterns
         layer_count = GcodeParserUtils.count_layers(gcode_content)
-        max_z = GcodeParserUtils.extract_max_z(gcode_content) or 0.0
-        nozzle_temp, bed_temp = GcodeParserUtils.extract_temperatures(gcode_content)
-        
+
         # Generic time patterns
         time_patterns = [
             r"time.*?(\d+)h\s*(\d+)m\s*(\d+)s",
@@ -334,10 +332,7 @@ class GenericGcodeParser(IGcodeParser):
             estimated_print_time=print_time,
             filament_used_grams=filament_grams,
             filament_used_millimeters=filament_mm,
-            max_z_height=max_z,
             layer_count=layer_count,
-            nozzle_temperature=nozzle_temp,
-            bed_temperature=bed_temp
         )
 
 class GcodeParserFactory:
