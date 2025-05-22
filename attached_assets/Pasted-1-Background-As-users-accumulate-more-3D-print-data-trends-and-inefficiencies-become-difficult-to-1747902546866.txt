@@ -1,0 +1,139 @@
+1. Background
+
+As users accumulate more 3D print data, trends and inefficiencies become difficult to identify manually. This analytics and visualization module will empower users to:
+
+    Track cost evolution over time
+
+    Compare slicer settings (e.g. layer height, infill) against cost/performance
+
+    Identify opportunities for cost optimization
+
+    Present printing performance and cost data to clients or internal stakeholders
+
+2. Requirements
+2.1. Must Have
+
+    Persist cost and metadata for all parsed prints
+
+    Generate time-series charts of total cost over time
+
+    Summarize total print cost by:
+
+    Project folder
+
+    Printer profile
+
+    Filament type
+
+2.2. Should Have
+
+    Interactive visualizations (line, pie, bar charts)
+
+    Compare prints across slicing variables
+
+    Export raw cost datasets as CSV
+
+2.3. Could Have
+
+    Detect cost outliers or efficiency anomalies
+
+    Suggest setting optimizations (e.g. speed vs. layer height tradeoff)
+
+    Visualize energy vs. material cost proportions
+
+2.4. Won’t Have (initially)
+
+    Machine learning-based failure prediction
+
+    Real-time slicer integration
+
+3. Method
+3.1. Data Model Extension
+
+Extend PrintProject and/or ParsedGcode with:
+
+public class PrintAnalyticsRecord
+{
+    public Guid Id { get; set; }
+    public DateTime PrintedOn { get; set; }
+    public string ProjectName { get; set; }
+    public string PrinterProfileId { get; set; }
+    public string MaterialProfileId { get; set; }
+    public float TotalCost { get; set; }
+    public float MaterialCost { get; set; }
+    public float ElectricityCost { get; set; }
+    public float DepreciationCost { get; set; }
+    public float PrintTimeHours { get; set; }
+
+    // Optional: saved slicing metadata
+    public float LayerHeight { get; set; }
+    public float InfillPercent { get; set; }
+    public float AverageSpeed { get; set; }
+}
+
+3.2. Backend Aggregations
+
+    /analytics/cost-over-time
+
+    /analytics/cost-by-printer
+
+    /analytics/cost-by-filament
+
+    /analytics/settings-comparison
+
+Use LINQ + EF Core to group and aggregate data in SQL.
+3.3. Frontend Visualization
+
+Use Chart.js or ngx-charts in Angular to create:
+
+    Line chart (cost over time)
+
+    Pie chart (cost breakdown by type or project)
+
+    Bar chart (comparison by profile or slicer setting)
+
+4. Implementation
+4.1. Step 1: Analytics DB Setup
+
+    Create PrintAnalyticsRecord table
+
+    Automatically save records after every cost calculation
+
+4.2. Step 2: API Endpoints
+
+    Implement analytics aggregation endpoints
+
+    Add filtering: date ranges, printer/material/profile
+
+4.3. Step 3: Frontend Dashboard
+
+    Angular component to display charts
+
+    Add dropdown filters and range selectors
+
+4.4. Step 4: Export Support
+
+    Allow CSV download for any dataset or breakdown
+
+5. Milestones
+
+    Analytics DB + ingestion
+
+    Cost over time view
+
+    Cost breakdown by printer and filament
+
+    Export to CSV
+
+    Slicer setting comparison dashboard
+
+6. Gathering Results
+
+    Confirm DB performance on 1000+ records
+
+    Validate data accuracy against input cost calculations
+
+    Collect user feedback on which visualizations drive action
+
+    Prioritize follow-ups based on usage and insights generated
+

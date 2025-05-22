@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "5001:5000"
+    environment:
+      - DATABASE_URL=postgresql://cost_calculator:password@db:5432/cost_calculator_db
+      - POSTGRES_DB=cost_calculator_db
+      - POSTGRES_USER=cost_calculator
+      - POSTGRES_PASSWORD=password
+    depends_on:
+      - db
+    volumes:
+      - ./data:/app/data  # Optional: for file persistence
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=cost_calculator_db
+      - POSTGRES_USER=cost_calculator
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
