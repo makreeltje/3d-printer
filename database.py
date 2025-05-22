@@ -5,11 +5,12 @@ Handles persistent storage of profiles, print history, and analytics data.
 import os
 from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
+
+import dateutil
 from sqlalchemy import create_engine, Column, Integer, Float, String, DateTime, Text, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from models import PrinterProfile, MaterialProfile, ParsedGcode, CostBreakdown
-import json
 
 # Database setup
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -63,14 +64,8 @@ class DBPrintHistory(Base):
     estimated_print_time_seconds = Column(Float)
     filament_used_grams = Column(Float)
     filament_used_millimeters = Column(Float)
-    max_z_height = Column(Float)
     layer_count = Column(Integer)
-    nozzle_temperature = Column(Float, nullable=True)
-    bed_temperature = Column(Float, nullable=True)
-    average_print_speed = Column(Float, nullable=True)
-    extrusion_volume = Column(Float, default=0.0)
-    extra_metadata = Column(JSON, default={})
-    
+
     # Cost breakdown
     material_cost = Column(Float)
     electricity_cost = Column(Float)
@@ -332,14 +327,10 @@ class DatabaseManager:
                 estimated_print_time_seconds=gcode_data.estimated_print_time.total_seconds(),
                 filament_used_grams=gcode_data.filament_used_grams,
                 filament_used_millimeters=gcode_data.filament_used_millimeters,
-                max_z_height=gcode_data.max_z_height,
                 layer_count=gcode_data.layer_count,
                 nozzle_temperature=gcode_data.nozzle_temperature,
                 bed_temperature=gcode_data.bed_temperature,
-                average_print_speed=gcode_data.average_print_speed,
-                extrusion_volume=gcode_data.extrusion_volume,
-                extra_metadata=gcode_data.extra_metadata,
-                
+
                 # Cost breakdown
                 material_cost=cost_breakdown.material_cost,
                 electricity_cost=cost_breakdown.electricity_cost,

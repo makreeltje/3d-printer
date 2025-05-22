@@ -46178,12 +46178,12 @@ M73 P100 R0
 ; filament cost = 0.65; total filament used [g] = 32.46
 ; total filament cost = 0.65
 ; total layers count = 20
-; total estimated time: 39m 0s
+; total estimated time: 39m 16s
 ; filament used [mm]: 10882.04
 ; type_times_1 =  1,1.502019; 2,3.017516; 8,72.606133; 9,5.171233; 10,2257.286133; 
 ; type_times_2 =  0,72.606133; 1,225.105377; 2,175.684814; 3,36.801640; 4,334.124084; 5,489.614960; 6,207.328171; 7,385.219879; 10,413.056854; 18,0.837516; 
 ; type_times_3 =  2340.387
-; estimated printing time (normal mode) = 39m 0s
+; estimated printing time (normal mode) = 39m 45s
 
 ; CONFIG_BLOCK_START
 ; absolute_correction = 0

@@ -51,27 +51,6 @@ class TestGcodeParserUtils:
         result = GcodeParserUtils.count_layers(content)
         assert result == 3
 
-    def test_extract_max_z(self):
-        """Test extracting maximum Z height."""
-        content = """
-        G1 Z0.2
-        G1 Z5.5
-        G1 Z10.0
-        G1 Z2.0
-        """
-        result = GcodeParserUtils.extract_max_z(content)
-        assert result == 10.0
-
-    def test_extract_temperatures(self):
-        """Test temperature extraction."""
-        content = """
-        M104 S210
-        M140 S60
-        """
-        nozzle, bed = GcodeParserUtils.extract_temperatures(content)
-        assert nozzle == 210
-        assert bed == 60
-
 
 class TestBambuGcodeParser:
     """Test Bambu Studio GCODE parser."""
@@ -93,8 +72,6 @@ class TestBambuGcodeParser:
         ; filament used [g] = 25.5
         ; filament used [mm] = 8500.0
         ; estimated printing time = 3h 15m 30s
-        ; layer_height = 0.2
-        ; max_layer_z = 50.0
         G1 Z50.0
         ; layer 1
         ; layer 2
@@ -108,7 +85,6 @@ class TestBambuGcodeParser:
         # The parser may not extract these exact values due to format differences
         # Let's test what it actually extracts
         assert result.estimated_print_time == timedelta(hours=3, minutes=15, seconds=30)
-        assert result.max_z_height == 50.0
         assert result.layer_count == 3
         # Note: filament extraction may vary based on exact comment format
 

@@ -2,6 +2,8 @@
 3D Printer Cost Calculator - Streamlit Application
 A comprehensive tool for calculating 3D printing costs with GCODE parsing and profile management.
 """
+import zipfile
+
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
@@ -112,18 +114,15 @@ def upload_gcode_file():
             col1, col2, col3 = st.columns(3)
             
             with col1:
+                st.metric("Slicer", gcode_data.slicer_name)
                 st.metric("Print Time", FormatUtils.format_duration(gcode_data.estimated_print_time))
-                st.metric("Filament Weight", FormatUtils.format_weight(gcode_data.filament_used_grams))
-            
+
             with col2:
-                st.metric("Layer Count", f"{gcode_data.layer_count:,}")
-                st.metric("Max Z Height", FormatUtils.format_length(gcode_data.max_z_height))
-            
+                st.metric("Filament Weight", FormatUtils.format_weight(gcode_data.filament_used_grams))
+                st.metric("Filament Used", FormatUtils.format_length(gcode_data.filament_used_millimeters))
+
             with col3:
-                if gcode_data.nozzle_temperature:
-                    st.metric("Nozzle Temp", f"{gcode_data.nozzle_temperature:.0f}°C")
-                if gcode_data.bed_temperature:
-                    st.metric("Bed Temp", f"{gcode_data.bed_temperature:.0f}°C")
+                st.metric("Layer Count", f"{gcode_data.layer_count:,}")
             
             return gcode_data
             
@@ -457,103 +456,112 @@ def batch_processing_page():
     """Batch processing page for multiple GCODE files."""
     st.title("Batch Processing")
     st.write("Upload multiple GCODE files to calculate costs for an entire project.")
-    
+
     # Multiple file upload
-    uploaded_files = st.file_uploader(
-        "Choose GCODE files",
-        type=['gcode', 'txt'],
-        accept_multiple_files=True,
-        help="Upload multiple GCODE files for batch processing"
+    uploaded_zip = st.file_uploader(
+        "Upload a ZIP file containing GCODE files",
+        type=['zip'],
+        help="Upload a ZIP file containing GCODE (.gcode, .txt) files, including sub-folders"
     )
-    
-    if uploaded_files:
-        st.success(f"Uploaded {len(uploaded_files)} files")
-        
-        # Cost parameters (simplified for batch)
-        st.subheader("Batch Cost Parameters")
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            batch_filament_price = st.number_input("Filament Price ($/kg)", value=25.0, min_value=0.0)
-            batch_electricity_price = st.number_input("Electricity Price ($/kWh)", value=0.12, min_value=0.0, format="%.3f")
-            batch_printer_power = st.number_input("Printer Power (Watts)", value=200.0, min_value=0.0)
-        
-        with col2:
-            batch_printer_cost = st.number_input("Printer Cost ($)", value=300.0, min_value=0.0)
-            batch_printer_lifetime = st.number_input("Printer Lifetime (hours)", value=5000.0, min_value=100.0)
-            batch_profit_margin = st.slider("Profit Margin (%)", min_value=0.0, max_value=100.0, value=20.0)
-        
-        if st.button("Process Batch", type="primary"):
-            batch_results = {}
-            progress_bar = st.progress(0)
-            status_text = st.empty()
-            
-            parser_factory = GcodeParserFactory()
-            
-            for i, uploaded_file in enumerate(uploaded_files):
-                try:
-                    status_text.text(f"Processing {uploaded_file.name}...")
-                    
-                    # Parse file
-                    file_content = uploaded_file.read().decode('utf-8')
-                    gcode_data = parser_factory.parse_gcode(file_content, uploaded_file.name)
-                    
-                    # Calculate cost
-                    calc_input = CostCalculationInput(
-                        gcode=gcode_data,
-                        filament_price_per_kg=batch_filament_price,
-                        electricity_price_per_kwh=batch_electricity_price,
-                        printer_power_watts=batch_printer_power,
-                        printer_cost=batch_printer_cost,
-                        printer_lifetime_hours=batch_printer_lifetime,
-                        profit_margin_percent=batch_profit_margin,
-                        setup_time_hours=0.0,
-                        labor_rate_per_hour=0.0,
-                        failure_rate_percent=0.0
-                    )
-                    
-                    cost_breakdown = CostCalculationEngine.calculate_cost(calc_input)
-                    batch_results[uploaded_file.name] = (gcode_data, cost_breakdown)
-                    
-                except Exception as e:
-                    st.error(f"Error processing {uploaded_file.name}: {str(e)}")
-                
-                progress_bar.progress((i + 1) / len(uploaded_files))
-            
-            status_text.text("Batch processing complete!")
-            st.session_state.batch_results = batch_results
-            
-            # Display results
-            if batch_results:
-                st.subheader("Batch Results")
-                
-                # Summary metrics
-                total_cost = sum(result[1].total_cost for result in batch_results.values())
-                total_time = sum(result[0].estimated_print_time.total_seconds() for result in batch_results.values()) / 3600
-                total_filament = sum(result[0].filament_used_grams for result in batch_results.values())
-                
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.metric("Total Cost", FormatUtils.format_currency(total_cost))
-                with col2:
-                    st.metric("Total Time", f"{total_time:.1f} hours")
-                with col3:
-                    st.metric("Total Filament", FormatUtils.format_weight(total_filament))
-                
-                # Results table
-                results_data = []
-                for filename, (gcode_data, cost_breakdown) in batch_results.items():
-                    results_data.append({
-                        'File': gcode_data.file_name,
-                        'Slicer': gcode_data.slicer_name,
-                        'Time': FormatUtils.format_duration(gcode_data.estimated_print_time),
-                        'Filament (g)': f"{gcode_data.filament_used_grams:.1f}",
-                        'Total Cost': FormatUtils.format_currency(cost_breakdown.total_cost),
-                        'Cost/g': FormatUtils.format_currency(cost_breakdown.cost_per_gram)
-                    })
-                
-                results_df = pd.DataFrame(results_data)
-                st.dataframe(results_df, use_container_width=True, hide_index=True)
+
+    if uploaded_zip is not None:
+        try:
+            with zipfile.ZipFile(uploaded_zip) as zip_file:
+                gcode_files = [
+                    (info.filename, zip_file.read(info).decode('utf-8'))
+                    for info in zip_file.infolist()
+                    if not info.is_dir() and info.filename.lower().endswith(('.gcode', '.txt'))
+                ]
+
+            if not gcode_files:
+                st.warning("No .gcode or .txt files found in the ZIP archive.")
+                return
+
+            st.success(f"Found {len(gcode_files)} GCODE files in ZIP archive")
+
+            # Cost parameters
+            st.subheader("Batch Cost Parameters")
+            col1, col2 = st.columns(2)
+
+            with col1:
+                batch_filament_price = st.number_input("Filament Price ($/kg)", value=25.0, min_value=0.0)
+                batch_electricity_price = st.number_input("Electricity Price ($/kWh)", value=0.12, min_value=0.0, format="%.3f")
+                batch_printer_power = st.number_input("Printer Power (Watts)", value=200.0, min_value=0.0)
+
+            with col2:
+                batch_printer_cost = st.number_input("Printer Cost ($)", value=300.0, min_value=0.0)
+                batch_printer_lifetime = st.number_input("Printer Lifetime (hours)", value=5000.0, min_value=100.0)
+                batch_profit_margin = st.slider("Profit Margin (%)", min_value=0.0, max_value=100.0, value=20.0)
+
+            if st.button("Process Batch", type="primary"):
+                batch_results = {}
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+
+                parser_factory = GcodeParserFactory()
+
+                for i, (file_name, file_content) in enumerate(gcode_files):
+                    try:
+                        status_text.text(f"Processing {file_name}...")
+                        gcode_data = parser_factory.parse_gcode(file_content, file_name)
+
+                        calc_input = CostCalculationInput(
+                            gcode=gcode_data,
+                            filament_price_per_kg=batch_filament_price,
+                            electricity_price_per_kwh=batch_electricity_price,
+                            printer_power_watts=batch_printer_power,
+                            printer_cost=batch_printer_cost,
+                            printer_lifetime_hours=batch_printer_lifetime,
+                            profit_margin_percent=batch_profit_margin,
+                            setup_time_hours=0.0,
+                            labor_rate_per_hour=0.0,
+                            failure_rate_percent=0.0
+                        )
+
+                        cost_breakdown = CostCalculationEngine.calculate_cost(calc_input)
+                        batch_results[file_name] = (gcode_data, cost_breakdown)
+
+                    except Exception as e:
+                        st.error(f"Error processing {file_name}: {str(e)}")
+
+                    progress_bar.progress((i + 1) / len(gcode_files))
+
+                status_text.text("Batch processing complete!")
+                st.session_state.batch_results = batch_results
+
+                # Display results
+                if batch_results:
+                    st.subheader("Batch Results")
+
+                    # Summary metrics
+                    total_cost = sum(result[1].total_cost for result in batch_results.values())
+                    total_time = sum(result[0].estimated_print_time.total_seconds() for result in batch_results.values()) / 3600
+                    total_filament = sum(result[0].filament_used_grams for result in batch_results.values())
+
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.metric("Total Cost", FormatUtils.format_currency(total_cost))
+                    with col2:
+                        st.metric("Total Time", f"{total_time:.1f} hours")
+                    with col3:
+                        st.metric("Total Filament", FormatUtils.format_weight(total_filament))
+
+                    # Results table
+                    results_data = []
+                    for filename, (gcode_data, cost_breakdown) in batch_results.items():
+                        results_data.append({
+                            'File': gcode_data.file_name,
+                            'Slicer': gcode_data.slicer_name,
+                            'Time': FormatUtils.format_duration(gcode_data.estimated_print_time),
+                            'Filament (g)': f"{gcode_data.filament_used_grams:.1f}",
+                            'Total Cost': FormatUtils.format_currency(cost_breakdown.total_cost),
+                            'Cost/g': FormatUtils.format_currency(cost_breakdown.cost_per_gram)
+                        })
+
+                    results_df = pd.DataFrame(results_data)
+                    st.dataframe(results_df, use_container_width=True, hide_index=True)
+        except zipfile.BadZipFile:
+            st.error("The uploaded file is not a valid ZIP archive.")
 
 def manage_profiles_page():
     """Profile management page."""

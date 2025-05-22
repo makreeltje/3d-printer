@@ -13,13 +13,7 @@ class ParsedGcode:
     estimated_print_time: timedelta
     filament_used_grams: float
     filament_used_millimeters: float
-    max_z_height: float
     layer_count: int
-    nozzle_temperature: Optional[float] = None
-    bed_temperature: Optional[float] = None
-    average_print_speed: Optional[float] = None
-    extrusion_volume: float = 0.0
-    extra_metadata: Dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class PrinterProfile:
