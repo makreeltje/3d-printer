@@ -48,8 +48,10 @@ jobs:
         pip install pytest
 
     - name: Setup database roles
+      env:
+        PGPASSWORD: test_password
       run: |
-        psql -U test_user -d test_db -c "CREATE ROLE root WITH LOGIN SUPERUSER PASSWORD 'root_password';"
+        psql -h localhost -U test_user -d test_db -c "CREATE ROLE root WITH LOGIN SUPERUSER PASSWORD 'root_password';"
 
     - name: Run tests with pytest
       env:
