@@ -1,94 +1,159 @@
 # Contributing to 3D Printer Cost Calculator
 
-We welcome contributions from the community! This project is designed to help hobbyists and professionals calculate the real cost of 3D prints. Whether you're adding a new feature, improving the UI, or updating documentation — you're in the right place.
+Thank you for your interest in contributing to the 3D Printer Cost Calculator! This document provides guidelines and information for contributors.
 
----
+## Getting Started
 
-## 🛠 Development Setup
+### Prerequisites
+- Python 3.11 or higher
+- UV package manager
+- Docker and Docker Compose
+- Git
 
-### Backend
+### Development Setup
+1. Fork the repository on GitHub
+2. Clone your fork locally:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/3d-printer-cost-calculator.git
+   cd 3d-printer-cost-calculator
+   ```
+3. Install dependencies:
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   uv sync
+   ```
+4. Set up pre-commit hooks (optional but recommended):
+   ```bash
+   uv run pre-commit install
+   ```
 
-- .NET 6.0 or later
-- IDE: Visual Studio / Rider / VS Code
+## Development Workflow
 
-### Frontend
+### Making Changes
+1. Create a new branch for your feature:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+2. Make your changes
+3. Add tests for new functionality
+4. Run the test suite:
+   ```bash
+   uv run pytest
+   ```
+5. Run code formatting:
+   ```bash
+   uv run black .
+   uv run isort .
+   ```
 
-- Node.js + npm
-- Angular CLI
+### Commit Guidelines
+- Use clear, descriptive commit messages
+- Follow the format: `type(scope): description`
+- Examples:
+  - `feat(parser): add support for PrusaSlicer GCODE`
+  - `fix(cost): correct electricity calculation formula`
+  - `docs(readme): update installation instructions`
 
----
+## Code Guidelines
 
-## 📁 Repository Structure
+### Python Style
+- Follow PEP 8 style guidelines
+- Use type hints for all functions
+- Maximum line length: 88 characters (Black default)
+- Use meaningful variable and function names
 
-- `/src`: .NET Core backend
-- `/ClientApp`: Angular frontend
-- `/docs/specs`: Architecture and requirements (AsciiDoc)
-- `.github/workflows`: CI/CD automation
+### Testing
+- Write tests for all new features
+- Maintain test coverage above 80%
+- Use descriptive test names
+- Test both success and error cases
 
----
+### Documentation
+- Add docstrings for all public functions and classes
+- Update README for new features
+- Include inline comments for complex logic
 
-## 🧪 Testing
+## Types of Contributions
 
-Run backend tests:
+### Bug Reports
+- Use the GitHub issue template
+- Include steps to reproduce
+- Provide system information
+- Include relevant log output
 
+### Feature Requests
+- Describe the use case
+- Explain the expected behavior
+- Consider backwards compatibility
+
+### Code Contributions
+- GCODE parser improvements
+- Cost calculation enhancements
+- UI/UX improvements
+- Database optimizations
+- Documentation updates
+
+## Testing
+
+### Running Tests
 ```bash
-dotnet test
+# Run all tests
+uv run pytest
+
+# Run with coverage
+uv run pytest --cov=. --cov-report=html
+
+# Run specific test file
+uv run pytest tests/test_gcode_parsers.py -v
 ```
 
-Frontend testing (Karma + Jasmine):
+### Writing Tests
+- Place tests in the `tests/` directory
+- Use descriptive test class and method names
+- Test edge cases and error conditions
+- Mock external dependencies appropriately
 
-```bash
-cd ClientApp
-ng test
-```
+## Documentation
 
----
+### Code Documentation
+- Use Google-style docstrings
+- Document parameters, return values, and exceptions
+- Include usage examples for complex functions
 
-## 🧩 Git Flow & Branching
+### User Documentation
+- Update README for new features
+- Add configuration examples
+- Include troubleshooting information
 
-We use a simplified Git Flow:
+## Release Process
 
-- `main`: production
-- `develop`: active integration
-- `feature/xyz`, `bugfix/abc`: for new work
+### Version Numbering
+We follow Semantic Versioning (SemVer):
+- MAJOR: Breaking changes
+- MINOR: New features (backwards compatible)
+- PATCH: Bug fixes (backwards compatible)
 
-Use this naming convention:
-```text
-feature/cost-engine
-bugfix/filament-weight
-docs/update-readme
-```
+### Release Checklist
+1. Update version in `pyproject.toml`
+2. Update CHANGELOG.md
+3. Run full test suite
+4. Create release PR
+5. Tag release after merge
 
----
+## Community Guidelines
 
-## ✅ Pull Request Checklist
+### Code of Conduct
+- Be respectful and inclusive
+- Focus on constructive feedback
+- Help newcomers learn and contribute
+- Acknowledge different perspectives
 
-Before submitting a PR:
+### Getting Help
+- Check existing issues and documentation
+- Ask questions in GitHub Discussions
+- Join our community chat (if available)
+- Reach out to maintainers for guidance
 
-- [ ] Code builds successfully
-- [ ] Relevant tests pass or are added
-- [ ] Your branch is up to date with `develop`
-- [ ] You’ve added a descriptive title and comments
-- [ ] You’ve linked the relevant issue
+## License
 
----
-
-## 🤖 Automation
-
-Our GitHub Actions handle:
-
-- Spec publishing via AsciiDoc
-- Labeling and checklist tracking
-- CI for backend/frontend (coming soon)
-
----
-
-## 💬 Questions or Help?
-
-Open a [Discussion](https://github.com/makreeltje/3d-printer/discussions) or ping in the issue.
-
-Thanks for contributing and improving this tool for the maker community!
-
----
-
-> Built with ❤️ by and for 3D printing enthusiasts.
+By contributing, you agree that your contributions will be licensed under the MIT License.

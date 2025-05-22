@@ -1,29 +1,31 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+FROM python:3.11-slim
+
+# Set working directory
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-ARG BUILD_CONFIGURATION=Release
-
-# Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
-    && apt-get install -y \
-        nodejs \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /src
-COPY ["3d-printer-cost-calculator.csproj", "./"]
-RUN dotnet restore "3d-printer-cost-calculator.csproj"
+# Copy requirements and install Python dependencies
+COPY pyproject.toml uv.lock ./
+RUN pip install uv && uv sync --frozen
+
+# Copy application code
 COPY . .
-WORKDIR "/src/"
-RUN dotnet build "3d-printer-cost-calculator.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "3d-printer-cost-calculator.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+# Create non-root user
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
 
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "3d-printer-cost-calculator.dll"]
+# Expose port
+EXPOSE 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:5000/_stcore/health || exit 1
+
+# Run the application
+CMD ["uv", "run", "streamlit", "run", "app.py", "--server.port=5000", "--server.address=0.0.0.0", "--server.headless=true"]

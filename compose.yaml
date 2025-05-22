@@ -1,6 +1,0 @@
-﻿services:
-  3d-printer-cost-calculator:
-    image: 3d-printer-cost-calculator
-    build:
-      context: .
-      dockerfile: Dockerfile
