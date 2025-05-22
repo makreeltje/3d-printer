@@ -1,98 +1,110 @@
-# .NET Core build and output directories
-bin/
-obj/
-[Dd]ebug/
-[Rr]elease/
-x64/
-x86/
-[Ww][Ii][Nn]32/
-[Aa][Rr][Mm]/
-[Aa][Rr][Mm]64/
-bld/
-[Bb]uild/
-msbuild.log
-msbuild.err
-msbuild.wrn
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Visual Studio files
-.vs/
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-*.dbmdl
-*.jfm
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
+# PyInstaller
+*.manifest
+*.spec
 
-# Rider files
-.idea/
-*.sln.iml
-*.ipr
-*.iws
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
 
-# NuGet Packages
-*.nupkg
-*.snupkg
-**/[Pp]ackages/*
-!**/[Pp]ackages/build/
-!**/[Pp]ackages/repositories.config
-*.nuget.props
-*.nuget.targets
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
 
-# Angular/Node.js files
-node_modules/
-npm-debug.log
-yarn-debug.log
-yarn-error.log
-.angular/
-.angular-cli.json
-.angular.json
-ClientApp/dist/
-ClientApp/out-tsc/
-ClientApp/bazel-out/
-ClientApp/coverage/
-ClientApp/.sass-cache/
-ClientApp/connect.lock/
-ClientApp/libpeerconnection.log
-ClientApp/testem.log
-ClientApp/typings/
-
-# Environment-specific files
+# Environments
 .env
-*.Development.json
-local.settings.json
-/Properties/PublishProfiles/
-/Properties/ServiceDependencies/
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
-# Temporary files
+# Streamlit
+.streamlit/
+
+# Database
+*.db
+*.sqlite3
+*.sql
+
+# Docker
+.dockerignore
+
+# IDE
+.vscode/
+.idea/
 *.swp
 *.swo
-*.tmp
-*.temp
 *~
+
+# OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
-desktop.ini
 
 # Logs
-logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
+logs/
 
-# 3D Printing specific
-*.gcode.gz
-*.gco.gz
-*.g.gz
-*.gc.gz
+# Temporary files
+tmp/
+temp/
+.tmp/
 
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Application specific
+uploads/
+data/
+backups/
+
+# Secrets and config
+config.local.yml
+secrets.yml
+.secrets
+
+# UV lock file (keep pyproject.toml, ignore lock)
+# Note: You might want to commit uv.lock for reproducible builds
+# uv.lock
